@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  # PostgreSQL com TimescaleDB
+  postgres:
+    image: timescale/timescaledb:latest-pg15
+    container_name: hive_management_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hive_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - hive_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d hive_management"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MQTT Broker (Mosquitto)
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: hive_management_mqtt
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mqtt/config:/mosquitto/config
+      # - ./mqtt/data:/mosquitto/data
+      # - ./mqtt/log:/mosquitto/log
+      - mosquitto_data:/mosquitto/data
+    networks:
+      - hive_network
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_pub -h localhost -t test -m 'health check' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Aplicação NestJS
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hive_management_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=hive_management
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres123
+      - MQTT_HOST=mosquitto
+      - MQTT_PORT=1883
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - hive_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+    profiles:
+      - app
+
+volumes:
+  postgres_data:
+    driver: local
+  mosquitto_data:
+    driver: local
+
+networks:
+  hive_network:
+    driver: bridge
