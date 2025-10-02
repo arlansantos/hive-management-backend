@@ -7,9 +7,9 @@ services:
     container_name: hive_management_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: hive_management
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
@@ -19,7 +19,7 @@ services:
     networks:
       - hive_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d hive_management"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d hive_management_db"]
       interval: 10s
       timeout: 5s
       retries: 5
