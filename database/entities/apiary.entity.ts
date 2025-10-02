@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { UserApiary } from './user-apiary.entity';
+import { Hive } from './hive.entity';
 
 @Entity('apiaries')
 export class Apiary {
@@ -24,4 +25,7 @@ export class Apiary {
 
   @OneToMany(() => UserApiary, (userApiary) => userApiary.apiary)
   userApiaries: UserApiary[];
+
+  @OneToMany(() => Hive, (hive) => hive.apiary)
+  hives: Hive[];
 }
