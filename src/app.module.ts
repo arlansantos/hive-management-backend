@@ -3,6 +3,7 @@ import { MqttModule } from './modules/mqtt/mqtt.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'database/entities/user.entity';
+import { Apiary } from 'database/entities/apiary.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -19,7 +20,7 @@ import { User } from 'database/entities/user.entity';
         username: configService.get<string>('DB_USER'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        entities: [User],
+        entities: [User, Apiary],
         synchronize: configService.get<boolean>('DB_SYNCHRONIZE'),
       }),
     }),
