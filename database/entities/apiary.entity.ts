@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { UserApiary } from './user-apiary.entity';
 
 @Entity('apiaries')
 export class Apiary {
@@ -19,4 +21,7 @@ export class Apiary {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @OneToMany(() => UserApiary, (userApiary) => userApiary.apiary)
+  userApiaries: UserApiary[];
 }

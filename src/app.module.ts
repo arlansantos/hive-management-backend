@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'database/entities/user.entity';
 import { Apiary } from 'database/entities/apiary.entity';
+import { UserApiary } from 'database/entities/user-apiary.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -20,7 +21,7 @@ import { Apiary } from 'database/entities/apiary.entity';
         username: configService.get<string>('DB_USER'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        entities: [User, Apiary],
+        entities: [User, Apiary, UserApiary],
         synchronize: configService.get<boolean>('DB_SYNCHRONIZE'),
       }),
     }),
