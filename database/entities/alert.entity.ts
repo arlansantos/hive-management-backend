@@ -21,7 +21,7 @@ export class Alert {
   @Column({ type: 'text' })
   message: string;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamp with time zone' })
   timestamp: Date;
 
   @ManyToOne(() => Hive, (hive) => hive.alerts, {

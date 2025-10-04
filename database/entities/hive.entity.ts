@@ -27,13 +27,17 @@ export class Hive {
   @Column({ type: 'varchar', length: 50 })
   status: string;
 
-  @Column({ name: 'last_read', type: 'timestamp', nullable: true })
+  @Column({
+    name: 'last_read',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
   lastRead: Date;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp with time zone' })
   updatedAt: Date;
 
   @ManyToOne(() => Apiary, (apiary) => apiary.hives, {

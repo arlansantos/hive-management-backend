@@ -16,7 +16,7 @@ export class UserApiary {
   @PrimaryColumn({ name: 'apiary_id', type: 'uuid' })
   apiaryId: string;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
   createdAt: Date;
 
   @ManyToOne(() => User, (user) => user.userApiaries, {

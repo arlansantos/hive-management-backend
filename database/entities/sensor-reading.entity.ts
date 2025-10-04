@@ -6,7 +6,7 @@ export class SensorReading {
   @PrimaryColumn({ name: 'hive_id', type: 'uuid' })
   hiveId: string;
 
-  @PrimaryColumn({ type: 'timestamp' })
+  @PrimaryColumn({ type: 'timestamp with time zone' })
   timestamp: Date;
 
   @Column({ type: 'float', nullable: true })
