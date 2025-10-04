@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { UserApiary } from './user-apiary.entity';
 import { Hive } from './hive.entity';
+import { Harvest } from './harvest.entity';
 
 @Entity('apiaries')
 export class Apiary {
@@ -28,4 +29,7 @@ export class Apiary {
 
   @OneToMany(() => Hive, (hive) => hive.apiary)
   hives: Hive[];
+
+  @OneToMany(() => Harvest, (harvest) => harvest.apiary)
+  harvests: Harvest[];
 }

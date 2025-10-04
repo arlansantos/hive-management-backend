@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { UserApiary } from './user-apiary.entity';
 import { Management } from './management.entity';
+import { Harvest } from './harvest.entity';
 
 @Entity('users')
 export class User {
@@ -34,4 +35,7 @@ export class User {
 
   @OneToMany(() => Management, (management) => management.user)
   managements: Management[];
+
+  @OneToMany(() => Harvest, (harvest) => harvest.user)
+  harvests: Harvest[];
 }
