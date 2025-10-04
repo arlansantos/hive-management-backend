@@ -9,6 +9,7 @@ import { Hive } from 'database/entities/hive.entity';
 import { SensorReading } from 'database/entities/sensor-reading.entity';
 import { Management } from 'database/entities/management.entity';
 import { Harvest } from 'database/entities/harvest.entity';
+import { Alert } from 'database/entities/alert.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -26,6 +27,7 @@ import { Harvest } from 'database/entities/harvest.entity';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
         entities: [
+          Alert,
           Apiary,
           Harvest,
           Hive,

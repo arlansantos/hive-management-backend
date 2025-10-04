@@ -11,6 +11,7 @@ import {
 import { Apiary } from './apiary.entity';
 import { SensorReading } from './sensor-reading.entity';
 import { Management } from './management.entity';
+import { Alert } from './alert.entity';
 
 @Entity('hives')
 export class Hive {
@@ -46,4 +47,7 @@ export class Hive {
 
   @OneToMany(() => Management, (management) => management.hive)
   managements: Management[];
+
+  @OneToMany(() => Alert, (alert) => alert.hive)
+  alerts: Alert[];
 }
