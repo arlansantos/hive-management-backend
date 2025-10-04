@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { UserApiary } from './user-apiary.entity';
+import { Management } from './management.entity';
 
 @Entity('users')
 export class User {
@@ -30,4 +31,7 @@ export class User {
 
   @OneToMany(() => UserApiary, (userApiary) => userApiary.user)
   userApiaries: UserApiary[];
+
+  @OneToMany(() => Management, (management) => management.user)
+  managements: Management[];
 }

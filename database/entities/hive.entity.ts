@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Apiary } from './apiary.entity';
 import { SensorReading } from './sensor-reading.entity';
+import { Management } from './management.entity';
 
 @Entity('hives')
 export class Hive {
@@ -42,4 +43,7 @@ export class Hive {
 
   @OneToMany(() => SensorReading, (sensorReading) => sensorReading.hive)
   sensorReadings: SensorReading[];
+
+  @OneToMany(() => Management, (management) => management.hive)
+  managements: Management[];
 }

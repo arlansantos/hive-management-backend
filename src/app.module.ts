@@ -7,6 +7,7 @@ import { Apiary } from 'database/entities/apiary.entity';
 import { UserApiary } from 'database/entities/user-apiary.entity';
 import { Hive } from 'database/entities/hive.entity';
 import { SensorReading } from 'database/entities/sensor-reading.entity';
+import { Management } from 'database/entities/management.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,7 +24,7 @@ import { SensorReading } from 'database/entities/sensor-reading.entity';
         username: configService.get<string>('DB_USER'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        entities: [User, Apiary, UserApiary, Hive, SensorReading],
+        entities: [User, Apiary, UserApiary, Hive, SensorReading, Management],
         synchronize: configService.get<boolean>('DB_SYNCHRONIZE'),
       }),
     }),
