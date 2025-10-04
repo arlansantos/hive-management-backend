@@ -4,10 +4,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Apiary } from './apiary.entity';
+import { SensorReading } from './sensor-reading.entity';
 
 @Entity('hives')
 export class Hive {
@@ -37,4 +39,7 @@ export class Hive {
   })
   @JoinColumn({ name: 'apiary_id' })
   apiary: Apiary;
+
+  @OneToMany(() => SensorReading, (sensorReading) => sensorReading.hive)
+  sensorReadings: SensorReading[];
 }
