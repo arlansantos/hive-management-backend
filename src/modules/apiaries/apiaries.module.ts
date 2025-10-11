@@ -8,5 +8,6 @@ import { Apiary } from 'database/entities/apiary.entity';
   imports: [TypeOrmModule.forFeature([Apiary])],
   controllers: [ApiariesController],
   providers: [ApiariesService],
+  exports: [ApiariesService],
 })
 export class ApiariesModule {}

@@ -11,6 +11,7 @@ import { Management } from 'database/entities/management.entity';
 import { Harvest } from 'database/entities/harvest.entity';
 import { Alert } from 'database/entities/alert.entity';
 import { ApiariesModule } from './modules/apiaries/apiaries.module';
+import { HivesModule } from './modules/hives/hives.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -43,6 +44,7 @@ import { ApiariesModule } from './modules/apiaries/apiaries.module';
     }),
     MqttModule,
     ApiariesModule,
+    HivesModule,
   ],
   controllers: [],
   providers: [],

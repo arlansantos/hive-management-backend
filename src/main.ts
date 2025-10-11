@@ -15,6 +15,7 @@ async function bootstrap() {
     )
     .setVersion('1.0')
     .addTag('Apiaries', 'Gerenciamento de apiários')
+    .addTag('Hives', 'Gerenciamento de colmeias')
     .build();
 
   const documentFactory = () =>
