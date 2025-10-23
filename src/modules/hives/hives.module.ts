@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { HivesService } from './hives.service';
 import { HivesController } from './hives.controller';
-import { Hive } from 'database/entities/hive.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ApiariesModule } from '../apiaries/apiaries.module';
+import { Hive } from 'src/database/entities/hive.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Hive]), ApiariesModule],

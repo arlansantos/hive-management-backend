@@ -2,16 +2,20 @@ import { Module } from '@nestjs/common';
 import { MqttModule } from './modules/mqtt/mqtt.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'database/entities/user.entity';
-import { Apiary } from 'database/entities/apiary.entity';
-import { UserApiary } from 'database/entities/user-apiary.entity';
-import { Hive } from 'database/entities/hive.entity';
-import { SensorReading } from 'database/entities/sensor-reading.entity';
-import { Management } from 'database/entities/management.entity';
-import { Harvest } from 'database/entities/harvest.entity';
-import { Alert } from 'database/entities/alert.entity';
 import { ApiariesModule } from './modules/apiaries/apiaries.module';
 import { HivesModule } from './modules/hives/hives.module';
+import { UsersModule } from './modules/users/users.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+import { Alert } from './database/entities/alert.entity';
+import { Apiary } from './database/entities/apiary.entity';
+import { Harvest } from './database/entities/harvest.entity';
+import { Hive } from './database/entities/hive.entity';
+import { Management } from './database/entities/management.entity';
+import { SensorReading } from './database/entities/sensor-reading.entity';
+import { User } from './database/entities/user.entity';
+import { UserApiary } from './database/entities/user-apiary.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -45,8 +49,15 @@ import { HivesModule } from './modules/hives/hives.module';
     MqttModule,
     ApiariesModule,
     HivesModule,
+    UsersModule,
+    AuthModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}

@@ -9,11 +9,17 @@ import {
   Post,
 } from '@nestjs/common';
 import { HivesService } from './hives.service';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { HiveResponseDto } from './dto/hive-response.dto';
 import { CreateHiveDto } from './dto/create-hive.dto';
 import { UpdateHiveDto } from './dto/update-hive.dto';
 
+@ApiBearerAuth()
 @ApiTags('Hives')
 @Controller('hives')
 export class HivesController {

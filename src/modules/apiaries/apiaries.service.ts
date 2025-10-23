@@ -5,10 +5,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Apiary } from 'database/entities/apiary.entity';
 import { Repository } from 'typeorm';
 import { CreateApiaryDto } from './dto/create-apiary.dto';
 import { UpdateApiaryDto } from './dto/update-apiary.dto';
+import { Apiary } from 'src/database/entities/apiary.entity';
 
 @Injectable()
 export class ApiariesService {

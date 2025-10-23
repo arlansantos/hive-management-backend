@@ -10,9 +10,15 @@ import {
 } from '@nestjs/common';
 import { ApiariesService } from './apiaries.service';
 import { CreateApiaryDto } from './dto/create-apiary.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ApiaryResponseDto } from './dto/apiary-response.dto';
 
+@ApiBearerAuth()
 @ApiTags('Apiaries')
 @Controller('apiaries')
 export class ApiariesController {

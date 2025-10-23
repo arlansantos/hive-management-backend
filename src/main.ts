@@ -15,7 +15,10 @@ async function bootstrap() {
     )
     .setVersion('1.0')
     .addTag('Apiaries', 'Gerenciamento de apiários')
+    .addTag('Auth', 'Autenticação e autorização')
     .addTag('Hives', 'Gerenciamento de colmeias')
+    .addTag('Users', 'Gerenciamento de usuários')
+    .addBearerAuth()
     .build();
 
   const documentFactory = () =>

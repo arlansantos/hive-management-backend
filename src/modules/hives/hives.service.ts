@@ -5,11 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Hive } from 'database/entities/hive.entity';
 import { Repository } from 'typeorm';
 import { CreateHiveDto } from './dto/create-hive.dto';
 import { UpdateHiveDto } from './dto/update-hive.dto';
 import { ApiariesService } from '../apiaries/apiaries.service';
+import { Hive } from 'src/database/entities/hive.entity';
 
 @Injectable()
 export class HivesService {
@@ -29,7 +29,6 @@ export class HivesService {
       });
 
       const savedHive = await this.hiveRepository.save(hive);
-      console.log('Hive created with ID:', savedHive);
       return savedHive;
     } catch (error) {
       if (error instanceof HttpException) {

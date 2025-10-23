@@ -9,6 +9,7 @@ import {
 import { UserApiary } from './user-apiary.entity';
 import { Management } from './management.entity';
 import { Harvest } from './harvest.entity';
+import { UserRole } from 'src/shared/enums/user-role.enum';
 
 @Entity('users')
 export class User {
@@ -23,6 +24,12 @@ export class User {
 
   @Column({ type: 'varchar', length: 255 })
   password: string;
+
+  @Column({ name: 'refresh_token', type: 'varchar', nullable: true })
+  refreshToken?: string | null;
+
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
+  role: UserRole;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
   createdAt: Date;
