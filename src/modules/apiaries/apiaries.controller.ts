@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
 } from '@nestjs/common';
@@ -45,7 +46,9 @@ export class ApiariesController {
   })
   @ApiResponse({ status: 404, description: 'Apiário não encontrado.' })
   @ApiResponse({ status: 500, description: 'Erro interno ao obter apiário.' })
-  async findOne(@Param('id') id: string): Promise<ApiaryResponseDto> {
+  async findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<ApiaryResponseDto> {
     return await this.apiariesService.findOne(id);
   }
 
@@ -74,7 +77,7 @@ export class ApiariesController {
     description: 'Erro interno ao atualizar apiário.',
   })
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() data: CreateApiaryDto,
   ): Promise<ApiaryResponseDto> {
     return await this.apiariesService.update(id, data);
@@ -92,7 +95,7 @@ export class ApiariesController {
     status: 500,
     description: 'Erro interno ao remover apiário.',
   })
-  async remove(@Param('id') id: string): Promise<void> {
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return await this.apiariesService.remove(id);
   }
 }

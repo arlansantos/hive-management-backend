@@ -1,10 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateHiveDto {
   @ApiProperty({ description: 'ID do apiário' })
   @IsString()
   @IsNotEmpty()
+  @IsUUID()
   apiaryId: string;
 
   @ApiProperty({ description: 'Nome da colmeia' })

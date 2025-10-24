@@ -17,6 +17,7 @@ import { SensorReading } from './database/entities/sensor-reading.entity';
 import { User } from './database/entities/user.entity';
 import { UserApiary } from './database/entities/user-apiary.entity';
 import { HarvestsModule } from './modules/harvests/harvests.module';
+import { ManagementsModule } from './modules/managements/managements.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -53,6 +54,7 @@ import { HarvestsModule } from './modules/harvests/harvests.module';
     UsersModule,
     AuthModule,
     HarvestsModule,
+    ManagementsModule,
   ],
   controllers: [],
   providers: [

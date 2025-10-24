@@ -1,9 +1,10 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class UpdateHiveDto {
   @ApiPropertyOptional({ description: 'ID do apiário' })
   @IsString()
+  @IsUUID()
   @IsOptional()
   apiaryId?: string;
 

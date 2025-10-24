@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
 } from '@nestjs/common';
@@ -46,7 +47,9 @@ export class HivesController {
   })
   @ApiResponse({ status: 404, description: 'Colmeia não encontrada.' })
   @ApiResponse({ status: 500, description: 'Erro interno ao obter colmeia.' })
-  async findOne(@Param('id') id: string): Promise<HiveResponseDto> {
+  async findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<HiveResponseDto> {
     return await this.hivesService.findOne(id);
   }
 
@@ -75,7 +78,7 @@ export class HivesController {
     description: 'Erro interno ao atualizar colmeia.',
   })
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() data: UpdateHiveDto,
   ): Promise<HiveResponseDto> {
     return await this.hivesService.update(id, data);
@@ -93,7 +96,7 @@ export class HivesController {
     status: 500,
     description: 'Erro interno ao remover colmeia.',
   })
-  async remove(@Param('id') id: string): Promise<void> {
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return await this.hivesService.remove(id);
   }
 }

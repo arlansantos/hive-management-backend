@@ -9,5 +9,6 @@ import { Hive } from 'src/database/entities/hive.entity';
   imports: [TypeOrmModule.forFeature([Hive]), ApiariesModule],
   controllers: [HivesController],
   providers: [HivesService],
+  exports: [HivesService],
 })
 export class HivesModule {}

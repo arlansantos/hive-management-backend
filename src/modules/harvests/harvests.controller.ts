@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
 } from '@nestjs/common';
@@ -57,7 +58,9 @@ export class HarvestsController {
   @ApiResponse({ status: 404, description: 'Colheita não encontrada.' })
   @ApiResponse({ status: 500, description: 'Erro ao buscar colheita.' })
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<HarvestResponseDto> {
+  async findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<HarvestResponseDto> {
     return await this.harvestsService.findOne(id);
   }
 
@@ -70,7 +73,7 @@ export class HarvestsController {
   @ApiResponse({ status: 500, description: 'Erro ao buscar colheita.' })
   @Get('apiary/:apiaryId')
   async findByApiary(
-    @Param('apiaryId') apiaryId: string,
+    @Param('apiaryId', ParseUUIDPipe) apiaryId: string,
   ): Promise<HarvestResponseDto[]> {
     return await this.harvestsService.findByApiary(apiaryId);
   }
@@ -97,7 +100,7 @@ export class HarvestsController {
   @ApiResponse({ status: 500, description: 'Erro ao atualizar colheita.' })
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateHarvestDto: UpdateHarvestDto,
   ): Promise<HarvestResponseDto> {
     return await this.harvestsService.update(id, updateHarvestDto);
@@ -111,7 +114,7 @@ export class HarvestsController {
   @ApiResponse({ status: 404, description: 'Colheita não encontrada.' })
   @ApiResponse({ status: 500, description: 'Erro ao deletar colheita.' })
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<void> {
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return await this.harvestsService.remove(id);
   }
 }

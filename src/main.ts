@@ -18,6 +18,7 @@ async function bootstrap() {
     .addTag('Auth', 'Autenticação e autorização')
     .addTag('Harvests', 'Gerenciamento de colheitas')
     .addTag('Hives', 'Gerenciamento de colmeias')
+    .addTag('Managements', 'Gerenciamento de manejos')
     .addTag('Users', 'Gerenciamento de usuários')
     .addBearerAuth()
     .build();

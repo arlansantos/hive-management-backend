@@ -23,9 +23,9 @@ export class Management {
   type: string;
 
   @Column({ type: 'text', nullable: true })
-  notes: string;
+  notes?: string;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'date', default: () => 'CURRENT_DATE' })
   date: Date;
 
   @ManyToOne(() => Hive, (hive) => hive.managements, {

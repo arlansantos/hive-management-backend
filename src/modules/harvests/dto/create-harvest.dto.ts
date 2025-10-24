@@ -6,12 +6,14 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
 } from 'class-validator';
 
 export class CreateHarvestDto {
   @ApiProperty({ description: 'ID do apiário' })
   @IsString()
   @IsNotEmpty()
+  @IsUUID()
   apiaryId: string;
 
   @ApiPropertyOptional({ description: 'Data da colheita' })
