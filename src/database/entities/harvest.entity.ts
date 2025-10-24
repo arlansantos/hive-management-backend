@@ -19,7 +19,7 @@ export class Harvest {
   @Column({ name: 'user_id', type: 'uuid' })
   userId: string;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'date', default: () => 'CURRENT_DATE' })
   date: Date;
 
   @Column({
@@ -29,7 +29,7 @@ export class Harvest {
     scale: 2,
     nullable: true,
   })
-  honeyWeight: number;
+  honeyWeight?: number;
 
   @Column({
     name: 'wax_weight',
@@ -38,10 +38,10 @@ export class Harvest {
     scale: 2,
     nullable: true,
   })
-  waxWeight: number;
+  waxWeight?: number;
 
   @Column({ type: 'text', nullable: true })
-  notes: string;
+  notes?: string;
 
   @ManyToOne(() => Apiary, (apiary) => apiary.harvests, {
     onDelete: 'CASCADE',

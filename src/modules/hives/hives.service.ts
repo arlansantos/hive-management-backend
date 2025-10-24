@@ -49,14 +49,17 @@ export class HivesService {
   async findOne(id: string): Promise<Hive> {
     try {
       const hive = await this.hiveRepository.findOneBy({ id });
+
       if (!hive) {
         throw new NotFoundException('Colmeia não encontrada');
       }
+
       return hive;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
+
       throw new InternalServerErrorException('Erro ao buscar colmeia');
     }
   }
@@ -64,15 +67,19 @@ export class HivesService {
   async update(id: string, data: UpdateHiveDto): Promise<Hive> {
     try {
       const hive = await this.hiveRepository.findOneBy({ id });
+
       if (!hive) {
         throw new NotFoundException('Colmeia não encontrada');
       }
+
       await this.hiveRepository.update(hive.id, data);
+
       return { ...hive, ...data };
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
+
       throw new InternalServerErrorException('Erro ao atualizar colmeia');
     }
   }
@@ -80,14 +87,17 @@ export class HivesService {
   async remove(id: string): Promise<void> {
     try {
       const hive = await this.hiveRepository.findOneBy({ id });
+
       if (!hive) {
         throw new NotFoundException('Colmeia não encontrada');
       }
+
       await this.hiveRepository.delete(id);
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
+
       throw new InternalServerErrorException('Erro ao remover colmeia');
     }
   }

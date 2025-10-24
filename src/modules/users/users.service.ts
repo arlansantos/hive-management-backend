@@ -4,6 +4,7 @@ import {
   HttpException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -56,6 +57,21 @@ export class UsersService {
 
   async findById(id: string): Promise<User | null> {
     return await this.usersRepository.findOneBy({ id });
+  }
+
+  async findOne(id: string): Promise<User> {
+    try {
+      const user = await this.usersRepository.findOneBy({ id });
+      if (!user) {
+        throw new NotFoundException('Usuário não encontrado');
+      }
+      return user;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Erro ao buscar usuário');
+    }
   }
 
   async updateRefreshToken(
