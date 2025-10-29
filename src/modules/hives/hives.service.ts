@@ -38,11 +38,15 @@ export class HivesService {
     }
   }
 
-  async findAll(): Promise<Hive[]> {
+  async findByApiary(apiaryId: string): Promise<Hive[]> {
     try {
-      return await this.hiveRepository.find();
+      return await this.hiveRepository.find({
+        where: { apiary: { id: apiaryId } },
+      });
     } catch {
-      throw new InternalServerErrorException('Erro ao buscar colmeias');
+      throw new InternalServerErrorException(
+        'Erro ao buscar colmeias por apiário',
+      );
     }
   }
 
@@ -61,6 +65,14 @@ export class HivesService {
       }
 
       throw new InternalServerErrorException('Erro ao buscar colmeia');
+    }
+  }
+
+  async findAll(): Promise<Hive[]> {
+    try {
+      return await this.hiveRepository.find();
+    } catch {
+      throw new InternalServerErrorException('Erro ao buscar colmeias');
     }
   }
 

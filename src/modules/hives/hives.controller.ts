@@ -38,6 +38,20 @@ export class HivesController {
     return await this.hivesService.create(data);
   }
 
+  @Get('apiary/:apiaryId')
+  @ApiOperation({ summary: 'Listar todas as colmeias de um apiário' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de colmeias pertencentes ao apiário.',
+    type: [HiveResponseDto],
+  })
+  @ApiResponse({ status: 500, description: 'Erro interno ao listar colmeias.' })
+  async findByApiary(
+    @Param('apiaryId', ParseUUIDPipe) apiaryId: string,
+  ): Promise<HiveResponseDto[]> {
+    return await this.hivesService.findByApiary(apiaryId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obter detalhes de uma colmeia por ID' })
   @ApiResponse({
