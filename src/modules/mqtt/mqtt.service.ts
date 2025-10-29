@@ -7,13 +7,18 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as mqtt from 'mqtt';
+import { CreateSensorReadingDto } from '../sensor-readings/dto/create-sensor-reading.dto';
+import { SensorReadingsService } from '../sensor-readings/sensor-readings.service';
 
 @Injectable()
 export class MqttService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(MqttService.name);
   private client: mqtt.MqttClient;
 
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private configService: ConfigService,
+    private sensorReadingsService: SensorReadingsService,
+  ) {}
 
   async onModuleInit() {
     await this.connect();
@@ -47,7 +52,7 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
 
     this.client.on('connect', () => {
       this.logger.log('Connected to MQTT broker successfully');
-      this.subscribeToTestTopic();
+      this.subscribeToTopics();
     });
 
     this.client.on('error', (error) => {
@@ -63,21 +68,51 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
-  private subscribeToTestTopic() {
-    const testTopic = 'test';
+private subscribeToTopics() {
+    const sensorTopic = 'hive/+/sensors';
 
-    this.client.subscribe(testTopic, (err) => {
+    this.client.subscribe(sensorTopic, (err) => {
       if (err) {
-        this.logger.error(`Failed to subscribe to topic ${testTopic}:`, err);
+        this.logger.error(`Failed to subscribe to topic ${sensorTopic}:`, err);
       } else {
-        this.logger.log(`Successfully subscribed to topic: ${testTopic}`);
+        this.logger.log(`Successfully subscribed to topic: ${sensorTopic}`);
       }
     });
 
     this.client.on('message', (topic, message) => {
+      this.handleSensorMessage(topic, message);
+    });
+  }
+
+  private async handleSensorMessage(topic: string, message: Buffer) {
+    try {
       this.logger.log(
         `📨 Received message on topic '${topic}': ${message.toString()}`,
       );
-    });
+
+      const hiveId = topic.split('/')[1];
+      const payload = JSON.parse(message.toString());
+
+      // Mapeamento (Payload -> DTO)
+      const createDto: CreateSensorReadingDto = {
+        hiveId: hiveId,
+        timestamp: new Date(payload.timestamp),
+        weight: payload.weight,
+        internalTemperature:
+          payload.temp_i === -127 ? null : payload.temp_i,
+        internalHumidity: payload.humid_i === -1 ? null : payload.humid_i,
+        externalTemperature:
+          payload.temp_e === -127 ? null : payload.temp_e,
+      };
+
+      await this.sensorReadingsService.create(createDto);
+      this.logger.log(`Successfully processed data for hive ${hiveId}`);
+
+    } catch (error) {
+      this.logger.error(
+        `Failed to process message from topic ${topic}:`,
+        error,
+      );
+    }
   }
 }

@@ -84,6 +84,20 @@ export class HivesService {
     }
   }
 
+  async updateLastRead(id: string, timestamp: Date): Promise<void> {
+    try {
+      await this.hiveRepository.update(id, { lastRead: timestamp });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        'Erro ao atualizar última leitura',
+      );
+    }
+  }
+
   async remove(id: string): Promise<void> {
     try {
       const hive = await this.hiveRepository.findOneBy({ id });
