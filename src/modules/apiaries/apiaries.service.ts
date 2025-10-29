@@ -26,11 +26,15 @@ export class ApiariesService {
     }
   }
 
-  async findAll(): Promise<Apiary[]> {
+  async findByUser(userId: string): Promise<Apiary[]> {
     try {
-      return await this.apiaryRepository.find();
+      return await this.apiaryRepository.find({
+        where: { userApiaries: { userId } },
+      });
     } catch {
-      throw new InternalServerErrorException('Erro ao buscar apiários');
+      throw new InternalServerErrorException(
+        'Erro ao buscar apiários por usuário',
+      );
     }
   }
 
@@ -46,6 +50,14 @@ export class ApiariesService {
         throw error;
       }
       throw new InternalServerErrorException('Erro ao buscar apiário');
+    }
+  }
+
+  async findAll(): Promise<Apiary[]> {
+    try {
+      return await this.apiaryRepository.find();
+    } catch {
+      throw new InternalServerErrorException('Erro ao buscar apiários');
     }
   }
 

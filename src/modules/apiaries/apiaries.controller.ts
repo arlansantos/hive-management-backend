@@ -18,6 +18,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ApiaryResponseDto } from './dto/apiary-response.dto';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { User } from 'src/database/entities/user.entity';
 
 @ApiBearerAuth()
 @ApiTags('Apiaries')
@@ -35,6 +37,18 @@ export class ApiariesController {
   @ApiResponse({ status: 500, description: 'Erro interno ao criar apiário.' })
   async create(@Body() data: CreateApiaryDto): Promise<ApiaryResponseDto> {
     return await this.apiariesService.create(data);
+  }
+
+  @Get('user')
+  @ApiOperation({ summary: 'Listar todos os apiários do usuário' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de apiários pertencentes ao usuário.',
+    type: [ApiaryResponseDto],
+  })
+  @ApiResponse({ status: 500, description: 'Erro interno ao listar apiários.' })
+  async findByUser(@CurrentUser() user: User): Promise<ApiaryResponseDto[]> {
+    return await this.apiariesService.findByUser(user.id);
   }
 
   @Get(':id')
