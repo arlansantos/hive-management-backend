@@ -9,6 +9,8 @@ import { Repository } from 'typeorm';
 import { CreateApiaryDto } from './dto/create-apiary.dto';
 import { UpdateApiaryDto } from './dto/update-apiary.dto';
 import { Apiary } from 'src/database/entities/apiary.entity';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationResponseDto } from 'src/common/dto/pagination-response.dto';
 
 @Injectable()
 export class ApiariesService {
@@ -26,11 +28,22 @@ export class ApiariesService {
     }
   }
 
-  async findByUser(userId: string): Promise<Apiary[]> {
+  async findByUser(
+    userId: string,
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginationResponseDto<Apiary>> {
     try {
-      return await this.apiaryRepository.find({
+      const { page, limit, orderBy, orderDirection } = paginationQuery;
+      const skip = (page - 1) * limit;
+
+      const [data, totalItems] = await this.apiaryRepository.findAndCount({
         where: { userApiaries: { userId } },
+        order: { [orderBy]: orderDirection },
+        skip: skip,
+        take: limit,
       });
+
+      return new PaginationResponseDto(data, totalItems, paginationQuery);
     } catch {
       throw new InternalServerErrorException(
         'Erro ao buscar apiários por usuário',

@@ -28,7 +28,20 @@ async function bootstrap() {
     SwaggerModule.createDocument(app, configSwagger);
   SwaggerModule.setup('api-docs', app, documentFactory);
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: false,
+    }),
+  );
+
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Authorization',
+    exposedHeaders: ['Content-Disposition'],
+  });
 
   const port = configService.get<number>('PORT', 3000);
   await app.listen(port);

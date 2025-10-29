@@ -10,6 +10,8 @@ import { CreateHiveDto } from './dto/create-hive.dto';
 import { UpdateHiveDto } from './dto/update-hive.dto';
 import { ApiariesService } from '../apiaries/apiaries.service';
 import { Hive } from 'src/database/entities/hive.entity';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationResponseDto } from 'src/common/dto/pagination-response.dto';
 
 @Injectable()
 export class HivesService {
@@ -38,11 +40,22 @@ export class HivesService {
     }
   }
 
-  async findByApiary(apiaryId: string): Promise<Hive[]> {
+  async findByApiary(
+    apiaryId: string,
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginationResponseDto<Hive>> {
     try {
-      return await this.hiveRepository.find({
+      const { page, limit, orderBy, orderDirection } = paginationQuery;
+      const skip = (page - 1) * limit;
+
+      const [data, totalItems] = await this.hiveRepository.findAndCount({
         where: { apiary: { id: apiaryId } },
+        order: { [orderBy]: orderDirection },
+        skip: skip,
+        take: limit,
       });
+
+      return new PaginationResponseDto(data, totalItems, paginationQuery);
     } catch {
       throw new InternalServerErrorException(
         'Erro ao buscar colmeias por apiário',

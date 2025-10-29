@@ -12,6 +12,8 @@ import { ApiariesService } from '../apiaries/apiaries.service';
 import { UsersService } from '../users/users.service';
 import { UpdateHarvestDto } from './dto/update-harvest.dto';
 import { HarvestResponseDto } from './dto/harvest-response.dto';
+import { PaginationResponseDto } from 'src/common/dto/pagination-response.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Injectable()
 export class HarvestsService {
@@ -66,14 +68,25 @@ export class HarvestsService {
     }
   }
 
-  async findByApiary(apiaryId: string): Promise<Harvest[]> {
+  async findByApiary(
+    apiaryId: string,
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginationResponseDto<Harvest>> {
     try {
-      return await this.harvestRepository.find({
+      const { page, limit, orderDirection } = paginationQuery;
+      const skip = (page - 1) * limit;
+
+      const [data, totalItems] = await this.harvestRepository.findAndCount({
         where: { apiary: { id: apiaryId } },
+        order: { date: orderDirection },
+        skip: skip,
+        take: limit,
       });
+
+      return new PaginationResponseDto(data, totalItems, paginationQuery);
     } catch {
       throw new InternalServerErrorException(
-        'Erro ao buscar colheitas do apiário',
+        'Erro ao buscar colheitas por apiário',
       );
     }
   }

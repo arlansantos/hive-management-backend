@@ -12,6 +12,8 @@ import { ManagementResponseDto } from './dto/management-response.dto';
 import { HivesService } from '../hives/hives.service';
 import { UsersService } from '../users/users.service';
 import { UpdateManagementDto } from './dto/update-management.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationResponseDto } from 'src/common/dto/pagination-response.dto';
 
 @Injectable()
 export class ManagementsService {
@@ -65,12 +67,22 @@ export class ManagementsService {
     }
   }
 
-  async findByHive(hiveId: string): Promise<Management[]> {
+  async findByHive(
+    hiveId: string,
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginationResponseDto<Management>> {
     try {
-      return await this.managementRepository.find({
+      const { page, limit, orderDirection } = paginationQuery;
+      const skip = (page - 1) * limit;
+
+      const [data, totalItems] = await this.managementRepository.findAndCount({
         where: { hive: { id: hiveId } },
-        order: { date: 'DESC' },
+        order: { date: orderDirection },
+        skip: skip,
+        take: limit,
       });
+
+      return new PaginationResponseDto(data, totalItems, paginationQuery);
     } catch {
       throw new InternalServerErrorException(
         'Erro ao buscar manejos por colmeia',

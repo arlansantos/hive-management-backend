@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { HivesService } from './hives.service';
 import {
@@ -19,6 +20,9 @@ import {
 import { HiveResponseDto } from './dto/hive-response.dto';
 import { CreateHiveDto } from './dto/create-hive.dto';
 import { UpdateHiveDto } from './dto/update-hive.dto';
+import { PaginationResponseDto } from 'src/common/dto/pagination-response.dto';
+import { Hive } from 'src/database/entities/hive.entity';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @ApiBearerAuth()
 @ApiTags('Hives')
@@ -43,13 +47,14 @@ export class HivesController {
   @ApiResponse({
     status: 200,
     description: 'Lista de colmeias pertencentes ao apiário.',
-    type: [HiveResponseDto],
+    type: PaginationResponseDto<Hive>,
   })
   @ApiResponse({ status: 500, description: 'Erro interno ao listar colmeias.' })
   async findByApiary(
     @Param('apiaryId', ParseUUIDPipe) apiaryId: string,
-  ): Promise<HiveResponseDto[]> {
-    return await this.hivesService.findByApiary(apiaryId);
+    @Query() paginationQuery: PaginationQueryDto,
+  ): Promise<PaginationResponseDto<Hive>> {
+    return await this.hivesService.findByApiary(apiaryId, paginationQuery);
   }
 
   @Get(':id')

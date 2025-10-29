@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { HarvestsService } from './harvests.service';
 import {
@@ -20,6 +21,9 @@ import { User } from 'src/database/entities/user.entity';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { HarvestResponseDto } from './dto/harvest-response.dto';
 import { UpdateHarvestDto } from './dto/update-harvest.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationResponseDto } from 'src/common/dto/pagination-response.dto';
+import { Harvest } from 'src/database/entities/harvest.entity';
 
 @ApiBearerAuth()
 @ApiTags('Harvests')
@@ -68,14 +72,15 @@ export class HarvestsController {
   @ApiResponse({
     status: 200,
     description: 'Detalhes das colheitas.',
-    type: [HarvestResponseDto],
+    type: PaginationResponseDto<Harvest>,
   })
   @ApiResponse({ status: 500, description: 'Erro ao buscar colheita.' })
   @Get('apiary/:apiaryId')
   async findByApiary(
     @Param('apiaryId', ParseUUIDPipe) apiaryId: string,
-  ): Promise<HarvestResponseDto[]> {
-    return await this.harvestsService.findByApiary(apiaryId);
+    @Query() paginationQuery: PaginationQueryDto,
+  ): Promise<PaginationResponseDto<Harvest>> {
+    return await this.harvestsService.findByApiary(apiaryId, paginationQuery);
   }
 
   @ApiOperation({ summary: 'Buscar todas as colheitas' })

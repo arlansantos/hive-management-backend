@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ManagementsService } from './managements.service';
 import {
@@ -20,6 +21,9 @@ import { ManagementResponseDto } from './dto/management-response.dto';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { User } from 'src/database/entities/user.entity';
 import { UpdateManagementDto } from './dto/update-management.dto';
+import { Management } from 'src/database/entities/management.entity';
+import { PaginationResponseDto } from 'src/common/dto/pagination-response.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @ApiBearerAuth()
 @ApiTags('Managements')
@@ -69,14 +73,15 @@ export class ManagementsController {
   @ApiResponse({
     status: 200,
     description: 'Lista de manejos para a colmeia especificada.',
-    type: [ManagementResponseDto],
+    type: PaginationResponseDto<Management>,
   })
   @ApiResponse({ status: 404, description: 'Colmeia não encontrada.' })
   @ApiResponse({ status: 500, description: 'Erro ao listar manejos.' })
   async findByHive(
     @Param('hiveId', ParseUUIDPipe) hiveId: string,
-  ): Promise<ManagementResponseDto[]> {
-    return await this.managementsService.findByHive(hiveId);
+    @Query() paginationQuery: PaginationQueryDto,
+  ): Promise<PaginationResponseDto<Management>> {
+    return await this.managementsService.findByHive(hiveId, paginationQuery);
   }
 
   @Patch(':id')
