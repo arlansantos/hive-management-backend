@@ -20,6 +20,7 @@ async function bootstrap() {
     .addTag('Hives', 'Gerenciamento de colmeias')
     .addTag('Managements', 'Gerenciamento de manejos')
     .addTag('Users', 'Gerenciamento de usuários')
+    .addTag('Sensor Readings', 'Leituras de sensores das colmeias')
     .addBearerAuth()
     .build();
 

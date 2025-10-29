@@ -1,14 +1,19 @@
 import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import { SensorReadingsService } from './sensor-readings.service';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { HistoryQueryDto } from './dto/history-query.dto';
-import { Public } from 'src/common/decorators/public.decorator';
 
+@ApiBearerAuth()
+@ApiTags('Sensor Readings')
 @Controller('sensor-readings')
 export class SensorReadingsController {
   constructor(private readonly sensorReadingsService: SensorReadingsService) {}
 
-  @Public()
   @Get(':hiveId/latest')
   @ApiOperation({ summary: 'Busca a última leitura de sensor da colmeia' })
   @ApiResponse({
@@ -27,7 +32,6 @@ export class SensorReadingsController {
     return this.sensorReadingsService.findLatest(hiveId);
   }
 
-  @Public()
   @Get(':hiveId/history')
   @ApiOperation({
     summary: 'Busca o histórico de leituras da colmeia (para gráficos)',
