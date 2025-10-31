@@ -11,18 +11,35 @@ import { UpdateApiaryDto } from './dto/update-apiary.dto';
 import { Apiary } from 'src/database/entities/apiary.entity';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { PaginationResponseDto } from 'src/common/dto/pagination-response.dto';
+import { UsersService } from '../users/users.service';
+import { UserApiary } from 'src/database/entities/user-apiary.entity';
 
 @Injectable()
 export class ApiariesService {
   constructor(
     @InjectRepository(Apiary)
     private apiaryRepository: Repository<Apiary>,
+    @InjectRepository(UserApiary)
+    private userApiaryRepository: Repository<UserApiary>,
+    private userService: UsersService,
   ) {}
 
-  async create(data: CreateApiaryDto): Promise<Apiary> {
+  async create(userId: string, data: CreateApiaryDto): Promise<Apiary> {
     try {
+      const user = await this.userService.findOne(userId);
+
       const apiary = this.apiaryRepository.create(data);
-      return await this.apiaryRepository.save(apiary);
+      const savedApiary = await this.apiaryRepository.save(apiary);
+
+      const userApiary = this.userApiaryRepository.create({
+        userId: user.id,
+        apiaryId: savedApiary.id,
+        user,
+        apiary: savedApiary,
+      });
+      await this.userApiaryRepository.save(userApiary);
+
+      return savedApiary;
     } catch {
       throw new InternalServerErrorException('Erro ao criar apiário');
     }

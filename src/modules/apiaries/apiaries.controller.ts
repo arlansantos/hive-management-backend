@@ -39,8 +39,11 @@ export class ApiariesController {
     type: ApiaryResponseDto,
   })
   @ApiResponse({ status: 500, description: 'Erro interno ao criar apiário.' })
-  async create(@Body() data: CreateApiaryDto): Promise<ApiaryResponseDto> {
-    return await this.apiariesService.create(data);
+  async create(
+    @CurrentUser() user: User,
+    @Body() data: CreateApiaryDto,
+  ): Promise<ApiaryResponseDto> {
+    return await this.apiariesService.create(user.id, data);
   }
 
   @Get('user')

@@ -77,11 +77,6 @@ export class SensorReadingsService {
     const { from, to } = query;
     const granularity = query.granularity || '1 hour';
 
-    console.log('Hive ID:', hiveId);
-    console.log('From:', from);
-    console.log('To:', to);
-    console.log('Granularity:', granularity);
-
     try {
       await this.hiveService.findOne(hiveId);
 
