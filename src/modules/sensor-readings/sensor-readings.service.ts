@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SensorReading } from 'src/database/entities/sensor-reading.entity';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { HivesService } from '../hives/hives.service';
 import { CreateSensorReadingDto } from './dto/create-sensor-reading.dto';
 import { HistoryQueryDto } from './dto/history-query.dto';
@@ -70,6 +70,27 @@ export class SensorReadingsService {
       if (error instanceof HttpException) throw error;
       this.logger.error('Erro ao buscar última leitura');
       throw new InternalServerErrorException('Erro ao buscar última leitura');
+    }
+  }
+
+  async findLastValidReading(
+    hiveId: string,
+    field: keyof SensorReading,
+  ): Promise<SensorReading | null> {
+    try {
+      return await this.sensorReadingRepository.findOne({
+        where: {
+          hiveId,
+          [field]: Not(IsNull()),
+        },
+        order: { timestamp: 'DESC' },
+      });
+    } catch (error) {
+      this.logger.error(
+        `Erro ao buscar última leitura válida para ${field}`,
+        error,
+      );
+      return null;
     }
   }
 

@@ -68,7 +68,7 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
-private subscribeToTopics() {
+  private subscribeToTopics() {
     const sensorTopic = 'hive/+/sensors';
 
     this.client.subscribe(sensorTopic, (err) => {
@@ -98,16 +98,13 @@ private subscribeToTopics() {
         hiveId: hiveId,
         timestamp: new Date(payload.timestamp),
         weight: payload.weight,
-        internalTemperature:
-          payload.temp_i === -127 ? null : payload.temp_i,
+        internalTemperature: payload.temp_i === -127 ? null : payload.temp_i,
         internalHumidity: payload.humid_i === -1 ? null : payload.humid_i,
-        externalTemperature:
-          payload.temp_e === -127 ? null : payload.temp_e,
+        externalTemperature: payload.temp_e === -127 ? null : payload.temp_e,
       };
 
       await this.sensorReadingsService.create(createDto);
       this.logger.log(`Successfully processed data for hive ${hiveId}`);
-
     } catch (error) {
       this.logger.error(
         `Failed to process message from topic ${topic}:`,
