@@ -22,6 +22,7 @@ import { SensorReadingsModule } from './modules/sensor-readings/sensor-readings.
 import { AlertsModule } from './modules/alerts/alerts.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -63,6 +64,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     SensorReadingsModule,
     AlertsModule,
     TasksModule,
+    DashboardModule,
   ],
   controllers: [],
   providers: [

@@ -15,6 +15,11 @@ import { HarvestResponseDto } from './dto/harvest-response.dto';
 import { PaginationResponseDto } from 'src/common/dto/pagination-response.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
+interface IHarvestStatsResult {
+  totalHoney: string | null;
+  totalWax: string | null;
+}
+
 @Injectable()
 export class HarvestsService {
   constructor(
@@ -88,6 +93,44 @@ export class HarvestsService {
       throw new InternalServerErrorException(
         'Erro ao buscar colheitas por apiário',
       );
+    }
+  }
+
+  async getStatsForApiaries(apiaryIds: string[]): Promise<{
+    totalHoney: number;
+    totalWax: number;
+  }> {
+    if (apiaryIds.length === 0) {
+      return { totalHoney: 0, totalWax: 0 };
+    }
+
+    // Filtro de data (Últimos 30 dias)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Formata para 'YYYY-MM-DD'
+    const dateFilter = thirtyDaysAgo.toISOString().split('T')[0];
+
+    try {
+      const query = this.harvestRepository
+        .createQueryBuilder('harvest')
+        .select('SUM(harvest.honeyWeight)', 'totalHoney')
+        .addSelect('SUM(harvest.waxWeight)', 'totalWax')
+        .where('harvest.apiaryId IN (:...ids)', { ids: apiaryIds })
+        .andWhere('harvest.date >= :dateFilter', { dateFilter });
+
+      const result = (await query.getRawOne()) as IHarvestStatsResult;
+
+      if (!result) {
+        return { totalHoney: 0, totalWax: 0 };
+      }
+
+      const totalHoney = parseFloat(result.totalHoney || '0');
+      const totalWax = parseFloat(result.totalWax || '0');
+
+      return { totalHoney, totalWax };
+    } catch {
+      return { totalHoney: 0, totalWax: 0 };
     }
   }
 

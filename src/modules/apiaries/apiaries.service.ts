@@ -68,6 +68,18 @@ export class ApiariesService {
     }
   }
 
+  async findAllByUserId(userId: string): Promise<Apiary[]> {
+    try {
+      return await this.apiaryRepository.find({
+        where: { userApiaries: { userId } },
+      });
+    } catch {
+      throw new InternalServerErrorException(
+        'Erro ao buscar apiários por usuário',
+      );
+    }
+  }
+
   async findOne(id: string): Promise<Apiary> {
     try {
       const apiary = await this.apiaryRepository.findOneBy({ id });

@@ -84,23 +84,21 @@ export class HivesService {
   async getHiveStats(apiaryIds: string[]): Promise<{
     total: number;
     offline: number;
-    alertCount: number; // Quantas colmeias únicas têm alertas
+    alertCount: number;
   }> {
     if (apiaryIds.length === 0) {
       return { total: 0, offline: 0, alertCount: 0 };
     }
 
-    const offlineThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 horas
+    const offlineThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-    // 1. Busca colmeias e seus alertas 'NEW'
     const hives = await this.hiveRepository.find({
       where: {
         apiary: { id: In(apiaryIds) },
       },
-      relations: ['alerts'], // Carrega os alertas relacionados
+      relations: ['alerts'],
     });
 
-    // 2. Calcula os status
     const total = hives.length;
     let offline = 0;
     let alertCount = 0;
@@ -118,10 +116,6 @@ export class HivesService {
         alertCount++;
       }
     }
-
-    // Nota: 'healthy' pode ser 'total - (offline + alertCount)'
-    // Mas uma colmeia pode estar offline E ter alerta, então cuidado para não contar dobrado.
-    // 'healthy' = total - (colmeias com *algum* problema)
 
     return { total, offline, alertCount };
   }
