@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateHiveDto } from './dto/create-hive.dto';
 import { UpdateHiveDto } from './dto/update-hive.dto';
 import { ApiariesService } from '../apiaries/apiaries.service';
@@ -61,6 +61,17 @@ export class HivesService {
         'Erro ao buscar colmeias por apiário',
       );
     }
+  }
+
+  async findAllHivesByApiaryIds(apiaryIds: string[]): Promise<Hive[]> {
+    if (apiaryIds.length === 0) {
+      return [];
+    }
+    return await this.hiveRepository.find({
+      where: {
+        apiaryId: In(apiaryIds),
+      },
+    });
   }
 
   async findOne(id: string): Promise<Hive> {

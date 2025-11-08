@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Alert } from 'src/database/entities/alert.entity';
 import { Repository } from 'typeorm';
@@ -185,12 +185,6 @@ export class AlertsService {
     }
   }
 
-  // --- 2. FACE EXTERNA (API ENDPOINTS) ---
-
-  /**
-   * Busca todos os alertas (para o frontend)
-   * TODO: Adicionar paginação e filtros (por status, hiveId, etc.)
-   */
   async findAll(hiveId?: string, status?: AlertStatus) {
     const query = this.alertRepository.createQueryBuilder('alert');
 
@@ -206,15 +200,27 @@ export class AlertsService {
     return query.getMany();
   }
 
-  /**
-   * Atualiza o status de um alerta (ex: Marcar como lido)
-   */
   async updateStatus(id: string, status: AlertStatus) {
     const alert = await this.alertRepository.findOneBy({ id });
     if (!alert) {
-      throw new Error('Alert not found'); // Trocar por HttpException
+      throw new NotFoundException('Alert not found');
     }
     alert.status = status;
     return this.alertRepository.save(alert);
+  }
+
+  async getNewAlertsCount(apiaryIds: string[]): Promise<number> {
+    const hives = await this.hivesService.findAllHivesByApiaryIds(apiaryIds);
+    const hiveIds = hives.map((hive) => hive.id);
+
+    if (hiveIds.length === 0) {
+      return 0;
+    }
+
+    return this.alertRepository
+      .createQueryBuilder('alert')
+      .where('alert.status = :status', { status: AlertStatus.NEW })
+      .andWhere('alert.hiveId IN (:...hiveIds)', { hiveIds })
+      .getCount();
   }
 }

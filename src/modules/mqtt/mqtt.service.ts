@@ -9,6 +9,8 @@ import { ConfigService } from '@nestjs/config';
 import * as mqtt from 'mqtt';
 import { CreateSensorReadingDto } from '../sensor-readings/dto/create-sensor-reading.dto';
 import { SensorReadingsService } from '../sensor-readings/sensor-readings.service';
+import { ALERT_THRESHOLDS } from '../alerts/alerts.constants';
+import { AlertsService } from '../alerts/alerts.service';
 
 @Injectable()
 export class MqttService implements OnModuleInit, OnModuleDestroy {
@@ -18,6 +20,7 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private configService: ConfigService,
     private sensorReadingsService: SensorReadingsService,
+    private alertsService: AlertsService,
   ) {}
 
   async onModuleInit() {
@@ -98,12 +101,24 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
         hiveId: hiveId,
         timestamp: new Date(payload.timestamp),
         weight: payload.weight,
-        internalTemperature: payload.temp_i === -127 ? null : payload.temp_i,
-        internalHumidity: payload.humid_i === -1 ? null : payload.humid_i,
-        externalTemperature: payload.temp_e === -127 ? null : payload.temp_e,
+        internalTemperature:
+          payload.temp_i === ALERT_THRESHOLDS.SENSOR_FAILURE_TEMP
+            ? null
+            : payload.temp_i,
+        internalHumidity:
+          payload.humid_i === ALERT_THRESHOLDS.SENSOR_FAILURE_HUMID
+            ? null
+            : payload.humid_i,
+        externalTemperature:
+          payload.temp_e === ALERT_THRESHOLDS.SENSOR_FAILURE_TEMP
+            ? null
+            : payload.temp_e,
       };
 
       await this.sensorReadingsService.create(createDto);
+
+      await this.alertsService.checkSensorReadingForAlerts(createDto);
+
       this.logger.log(`Successfully processed data for hive ${hiveId}`);
     } catch (error) {
       this.logger.error(
