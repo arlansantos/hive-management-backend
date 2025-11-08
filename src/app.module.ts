@@ -20,6 +20,8 @@ import { HarvestsModule } from './modules/harvests/harvests.module';
 import { ManagementsModule } from './modules/managements/managements.module';
 import { SensorReadingsModule } from './modules/sensor-readings/sensor-readings.module';
 import { AlertsModule } from './modules/alerts/alerts.module';
+import { TasksModule } from './modules/tasks/tasks.module';
+import { ScheduleModule } from '@nestjs/schedule';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -50,6 +52,7 @@ import { AlertsModule } from './modules/alerts/alerts.module';
         synchronize: configService.get<boolean>('DB_SYNCHRONIZE'),
       }),
     }),
+    ScheduleModule.forRoot(),
     MqttModule,
     ApiariesModule,
     HivesModule,
@@ -59,6 +62,7 @@ import { AlertsModule } from './modules/alerts/alerts.module';
     ManagementsModule,
     SensorReadingsModule,
     AlertsModule,
+    TasksModule,
   ],
   controllers: [],
   providers: [

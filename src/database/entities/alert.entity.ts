@@ -1,9 +1,11 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Hive } from './hive.entity';
 import { AlertType } from 'src/shared/enums/alert-type.enum';
@@ -19,14 +21,14 @@ export class Alert {
   hiveId: string;
 
   @Column({
-    type: 'enum',
-    enum: AlertType,
+    type: 'varchar',
+    length: 100,
   })
   type: AlertType;
 
   @Column({
-    type: 'enum',
-    enum: AlertSeverity,
+    type: 'varchar',
+    length: 100,
   })
   severity: AlertSeverity;
 
@@ -34,17 +36,17 @@ export class Alert {
   message: string;
 
   @Column({
-    type: 'enum',
-    enum: AlertStatus,
+    type: 'varchar',
+    length: 100,
     default: AlertStatus.NEW,
   })
   status: AlertStatus;
 
-  @Column({
-    type: 'timestamp with time zone',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  timestamp: Date;
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp with time zone' })
+  updatedAt: Date;
 
   @ManyToOne(() => Hive, (hive) => hive.alerts, {
     onDelete: 'CASCADE',

@@ -1,4 +1,10 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Alert } from 'src/database/entities/alert.entity';
 import { Repository } from 'typeorm';
@@ -9,6 +15,10 @@ import { AlertType } from 'src/shared/enums/alert-type.enum';
 import { AlertSeverity } from 'src/shared/enums/alert-severity.enum';
 import { ALERT_THRESHOLDS } from './alerts.constants';
 import { AlertStatus } from 'src/shared/enums/alert-status.enum';
+import { UpdateAlertDto } from './dto/update-alert.dto';
+import { FindAllAlertsQueryDto } from './dto/find-all-alerts-query.dto';
+import { PaginationResponseDto } from 'src/common/dto/pagination-response.dto';
+import { formatAlertTimestamp } from 'src/common/utils/date.util';
 
 @Injectable()
 export class AlertsService {
@@ -71,12 +81,14 @@ export class AlertsService {
     )
       return;
 
+    const readingTime = formatAlertTimestamp(reading.timestamp);
+
     if (reading.internalTemperature > ALERT_THRESHOLDS.INTERNAL_TEMP_MAX) {
       this.createAlert(
         reading.hiveId,
         AlertType.HIGH_INTERNAL_TEMP,
         AlertSeverity.CRITICAL,
-        `Temperatura interna atingiu ${reading.internalTemperature}°C.`,
+        `Temperatura interna atingiu ${reading.internalTemperature}°C (Ocorrência: ${readingTime}).`,
       );
     } else if (
       reading.internalTemperature < ALERT_THRESHOLDS.INTERNAL_TEMP_MIN
@@ -153,7 +165,7 @@ export class AlertsService {
     }
   }
 
-  private async createAlert(
+  async createAlert(
     hiveId: string,
     type: AlertType,
     severity: AlertSeverity,
@@ -185,42 +197,73 @@ export class AlertsService {
     }
   }
 
-  async findAll(hiveId?: string, status?: AlertStatus) {
-    const query = this.alertRepository.createQueryBuilder('alert');
+  async findAll(
+    queryDto: FindAllAlertsQueryDto,
+  ): Promise<PaginationResponseDto<Alert>> {
+    try {
+      const { page, limit, orderBy, orderDirection, hiveId, status } = queryDto;
 
-    if (hiveId) {
-      query.andWhere('alert.hiveId = :hiveId', { hiveId });
+      const query = this.alertRepository
+        .createQueryBuilder('alert')
+        .skip((page - 1) * limit)
+        .take(limit)
+        .orderBy(`alert.${orderBy}`, orderDirection);
+
+      if (hiveId) {
+        query.andWhere('alert.hiveId = :hiveId', { hiveId });
+      }
+
+      if (status) {
+        query.andWhere('alert.status = :status', { status });
+      }
+
+      const [data, totalItems] = await query.getManyAndCount();
+
+      return new PaginationResponseDto(data, totalItems, queryDto);
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException('Erro ao buscar alertas');
     }
-    if (status) {
-      query.andWhere('alert.status = :status', { status });
-    }
-
-    query.orderBy('alert.timestamp', 'DESC');
-
-    return query.getMany();
   }
 
-  async updateStatus(id: string, status: AlertStatus) {
-    const alert = await this.alertRepository.findOneBy({ id });
-    if (!alert) {
-      throw new NotFoundException('Alert not found');
+  async updateStatus(id: string, updateAlertDto: UpdateAlertDto) {
+    try {
+      const alert = await this.alertRepository.findOneBy({ id });
+
+      if (!alert) {
+        throw new NotFoundException('Alerta não encontrado');
+      }
+
+      await this.alertRepository.update(id, updateAlertDto);
+
+      return { ...alert, ...updateAlertDto };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('Erro ao atualizar alerta');
     }
-    alert.status = status;
-    return this.alertRepository.save(alert);
   }
 
   async getNewAlertsCount(apiaryIds: string[]): Promise<number> {
-    const hives = await this.hivesService.findAllHivesByApiaryIds(apiaryIds);
-    const hiveIds = hives.map((hive) => hive.id);
+    try {
+      const hives = await this.hivesService.findAllHivesByApiaryIds(apiaryIds);
+      const hiveIds = hives.map((hive) => hive.id);
 
-    if (hiveIds.length === 0) {
-      return 0;
+      if (hiveIds.length === 0) {
+        return 0;
+      }
+
+      return this.alertRepository
+        .createQueryBuilder('alert')
+        .where('alert.status = :status', { status: AlertStatus.NEW })
+        .andWhere('alert.hiveId IN (:...hiveIds)', { hiveIds })
+        .getCount();
+    } catch {
+      throw new InternalServerErrorException(
+        'Erro ao obter contagem de novos alertas',
+      );
     }
-
-    return this.alertRepository
-      .createQueryBuilder('alert')
-      .where('alert.status = :status', { status: AlertStatus.NEW })
-      .andWhere('alert.hiveId IN (:...hiveIds)', { hiveIds })
-      .getCount();
   }
 }

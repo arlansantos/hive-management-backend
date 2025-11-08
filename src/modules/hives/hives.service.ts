@@ -12,6 +12,7 @@ import { ApiariesService } from '../apiaries/apiaries.service';
 import { Hive } from 'src/database/entities/hive.entity';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { PaginationResponseDto } from 'src/common/dto/pagination-response.dto';
+import { AlertStatus } from 'src/shared/enums/alert-status.enum';
 
 @Injectable()
 export class HivesService {
@@ -67,11 +68,62 @@ export class HivesService {
     if (apiaryIds.length === 0) {
       return [];
     }
-    return await this.hiveRepository.find({
+    try {
+      return await this.hiveRepository.find({
+        where: {
+          apiary: { id: In(apiaryIds) }, // Assumindo que a relação é 'apiary'
+        },
+      });
+    } catch {
+      throw new InternalServerErrorException(
+        'Erro ao buscar colmeias por apiários',
+      );
+    }
+  }
+
+  async getHiveStats(apiaryIds: string[]): Promise<{
+    total: number;
+    offline: number;
+    alertCount: number; // Quantas colmeias únicas têm alertas
+  }> {
+    if (apiaryIds.length === 0) {
+      return { total: 0, offline: 0, alertCount: 0 };
+    }
+
+    const offlineThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 horas
+
+    // 1. Busca colmeias e seus alertas 'NEW'
+    const hives = await this.hiveRepository.find({
       where: {
-        apiaryId: In(apiaryIds),
+        apiary: { id: In(apiaryIds) },
       },
+      relations: ['alerts'], // Carrega os alertas relacionados
     });
+
+    // 2. Calcula os status
+    const total = hives.length;
+    let offline = 0;
+    let alertCount = 0;
+
+    for (const hive of hives) {
+      const isOffline = !hive.lastRead || hive.lastRead < offlineThreshold;
+      const hasNewAlerts = hive.alerts.some(
+        (alert) => alert.status === AlertStatus.NEW,
+      );
+
+      if (isOffline) {
+        offline++;
+      }
+      if (hasNewAlerts) {
+        alertCount++;
+      }
+    }
+
+    // Nota: 'healthy' pode ser 'total - (offline + alertCount)'
+    // Mas uma colmeia pode estar offline E ter alerta, então cuidado para não contar dobrado.
+    // 'healthy' = total - (colmeias com *algum* problema)
+
+    return { total, offline, alertCount };
   }
 
   async findOne(id: string): Promise<Hive> {
