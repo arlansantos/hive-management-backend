@@ -36,7 +36,7 @@ export class DashboardService {
 
     const cardHives = {
       ...hiveStats,
-      healthy: hiveStats.total - (hiveStats.offline + hiveStats.alertCount), // Cálculo simples
+      healthy: hiveStats.total - (hiveStats.offline + hiveStats.alertCount),
     };
 
     const cardHarvests = {

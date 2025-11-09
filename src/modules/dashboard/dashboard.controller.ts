@@ -1,7 +1,24 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { User } from 'src/database/entities/user.entity';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('dashboard')
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
+
+  @Get('stats')
+  @ApiOperation({ summary: 'Obter estatísticas do dashboard' })
+  @ApiResponse({
+    status: 200,
+    description: 'Estatísticas do dashboard obtidas com sucesso.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Erro ao obter estatísticas do dashboard.',
+  })
+  async getDashboardStats(@CurrentUser() user: User) {
+    return await this.dashboardService.getDashboardStats(user.id);
+  }
 }
