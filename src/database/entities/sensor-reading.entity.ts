@@ -1,4 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { Hive } from './hive.entity';
 
 @Entity('sensor_readings')
@@ -20,6 +27,9 @@ export class SensorReading {
 
   @Column({ name: 'external_temperature', type: 'float', nullable: true })
   externalTemperature: number;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
+  createdAt: Date;
 
   @ManyToOne(() => Hive, (hive) => hive.sensorReadings, {
     onDelete: 'CASCADE',

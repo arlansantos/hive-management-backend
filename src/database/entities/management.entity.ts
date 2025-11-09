@@ -1,9 +1,11 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Hive } from './hive.entity';
 import { User } from './user.entity';
@@ -27,6 +29,12 @@ export class Management {
 
   @Column({ type: 'date', default: () => 'CURRENT_DATE' })
   date: Date;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp with time zone' })
+  updatedAt: Date;
 
   @ManyToOne(() => Hive, (hive) => hive.managements, {
     onDelete: 'CASCADE',

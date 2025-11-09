@@ -12,6 +12,7 @@ import { Apiary } from './apiary.entity';
 import { SensorReading } from './sensor-reading.entity';
 import { Management } from './management.entity';
 import { Alert } from './alert.entity';
+import { HiveStatus } from 'src/shared/enums/hive-status.enum';
 
 @Entity('hives')
 export class Hive {
@@ -24,8 +25,12 @@ export class Hive {
   @Column({ type: 'varchar' })
   name: string;
 
-  @Column({ type: 'varchar', length: 50 })
-  status: string;
+  @Column({
+    type: 'varchar',
+    length: 50,
+    default: HiveStatus.ACTIVE,
+  })
+  status: HiveStatus;
 
   @Column({
     name: 'last_read',
