@@ -72,7 +72,7 @@ export class HivesService {
     try {
       return await this.hiveRepository.find({
         where: {
-          apiary: { id: In(apiaryIds) }, // Assumindo que a relação é 'apiary'
+          apiary: { id: In(apiaryIds) },
         },
       });
     } catch {
@@ -99,9 +99,10 @@ export class HivesService {
     total: number;
     offline: number;
     alertCount: number;
+    healthy: number;
   }> {
     if (apiaryIds.length === 0) {
-      return { total: 0, offline: 0, alertCount: 0 };
+      return { total: 0, offline: 0, alertCount: 0, healthy: 0 };
     }
 
     const offlineThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -117,6 +118,8 @@ export class HivesService {
     let offline = 0;
     let alertCount = 0;
 
+    const problematicHives = new Set<string>();
+
     for (const hive of hives) {
       const isOffline = !hive.lastRead || hive.lastRead < offlineThreshold;
       const hasNewAlerts = hive.alerts.some(
@@ -125,13 +128,17 @@ export class HivesService {
 
       if (isOffline) {
         offline++;
+        problematicHives.add(hive.id);
       }
       if (hasNewAlerts) {
         alertCount++;
+        problematicHives.add(hive.id);
       }
     }
 
-    return { total, offline, alertCount };
+    const healthy = total - problematicHives.size;
+
+    return { total, offline, alertCount, healthy };
   }
 
   async findOne(id: string): Promise<Hive> {

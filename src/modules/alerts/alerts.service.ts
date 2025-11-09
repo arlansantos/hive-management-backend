@@ -19,7 +19,12 @@ import { UpdateAlertDto } from './dto/update-alert.dto';
 import { FindAllAlertsQueryDto } from './dto/find-all-alerts-query.dto';
 import { PaginationResponseDto } from 'src/common/dto/pagination-response.dto';
 import { formatAlertTimestamp } from 'src/common/utils/date.util';
+import { CardAlertsStatsDto } from '../dashboard/dto/dashboard-stats-response.dto';
 
+interface IAlertCountBySeverity {
+  severity: AlertSeverity;
+  count: string;
+}
 @Injectable()
 export class AlertsService {
   private readonly logger = new Logger(AlertsService.name);
@@ -213,7 +218,8 @@ export class AlertsService {
     queryDto: FindAllAlertsQueryDto,
   ): Promise<PaginationResponseDto<Alert>> {
     try {
-      const { page, limit, orderBy, orderDirection, hiveId, status } = queryDto;
+      const { page, limit, orderBy, orderDirection, hiveId, status, severity } =
+        queryDto;
 
       const query = this.alertRepository
         .createQueryBuilder('alert')
@@ -227,6 +233,10 @@ export class AlertsService {
 
       if (status) {
         query.andWhere('alert.status = :status', { status });
+      }
+
+      if (severity) {
+        query.andWhere('alert.severity = :severity', { severity });
       }
 
       const [data, totalItems] = await query.getManyAndCount();
@@ -258,24 +268,47 @@ export class AlertsService {
     }
   }
 
-  async getNewAlertsCount(apiaryIds: string[]): Promise<number> {
-    try {
-      const hives = await this.hivesService.findAllHivesByApiaryIds(apiaryIds);
-      const hiveIds = hives.map((hive) => hive.id);
+  async getNewAlertsStats(apiaryIds: string[]): Promise<CardAlertsStatsDto> {
+    const stats: CardAlertsStatsDto = {
+      total: 0,
+      critical: 0,
+      warning: 0,
+      info: 0,
+    };
 
-      if (hiveIds.length === 0) {
-        return 0;
-      }
+    const hives = await this.hivesService.findAllHivesByApiaryIds(apiaryIds);
+    const hiveIds = hives.map((hive) => hive.id);
 
-      return this.alertRepository
-        .createQueryBuilder('alert')
-        .where('alert.status = :status', { status: AlertStatus.NEW })
-        .andWhere('alert.hiveId IN (:...hiveIds)', { hiveIds })
-        .getCount();
-    } catch {
-      throw new InternalServerErrorException(
-        'Erro ao obter contagem de novos alertas',
-      );
+    if (hiveIds.length === 0) {
+      return stats;
     }
+
+    const rawCounts = await this.alertRepository
+      .createQueryBuilder('alert')
+      .select('alert.severity', 'severity')
+      .addSelect('COUNT(alert.id)', 'count')
+      .where('alert.status = :status', { status: AlertStatus.NEW })
+      .andWhere('alert.hiveId IN (:...hiveIds)', { hiveIds })
+      .groupBy('alert.severity')
+      .getRawMany<IAlertCountBySeverity>();
+
+    for (const row of rawCounts) {
+      const count = parseInt(row.count, 10) || 0;
+      stats.total += count;
+
+      switch (row.severity) {
+        case AlertSeverity.CRITICAL:
+          stats.critical = count;
+          break;
+        case AlertSeverity.WARNING:
+          stats.warning = count;
+          break;
+        case AlertSeverity.INFO:
+          stats.info = count;
+          break;
+      }
+    }
+
+    return stats;
   }
 }

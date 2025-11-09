@@ -14,6 +14,7 @@ import { UsersService } from '../users/users.service';
 import { UpdateManagementDto } from './dto/update-management.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { PaginationResponseDto } from 'src/common/dto/pagination-response.dto';
+import { CardManagementStatsDto } from '../dashboard/dto/dashboard-stats-response.dto';
 
 @Injectable()
 export class ManagementsService {
@@ -87,6 +88,32 @@ export class ManagementsService {
       throw new InternalServerErrorException(
         'Erro ao buscar manejos por colmeia',
       );
+    }
+  }
+
+  async getStatsForApiaries(
+    apiaryIds: string[],
+  ): Promise<CardManagementStatsDto> {
+    if (apiaryIds.length === 0) {
+      return { countLastDays: 0 };
+    }
+
+    // Filtro de data (Últimos 15 dias)
+    const daysAgo = new Date();
+    daysAgo.setDate(daysAgo.getDate() - 15);
+    const dateFilter = daysAgo.toISOString().split('T')[0];
+
+    try {
+      const count = await this.managementRepository
+        .createQueryBuilder('management')
+        .leftJoin('management.hive', 'hive')
+        .where('hive.apiaryId IN (:...apiaryIds)', { apiaryIds })
+        .andWhere('management.date >= :dateFilter', { dateFilter })
+        .getCount();
+
+      return { countLastDays: count };
+    } catch {
+      return { countLastDays: 0 };
     }
   }
 

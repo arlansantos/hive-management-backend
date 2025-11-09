@@ -7,6 +7,7 @@ import { HarvestsModule } from '../harvests/harvests.module';
 import { AlertsModule } from '../alerts/alerts.module';
 import { SensorReadingsModule } from '../sensor-readings/sensor-readings.module';
 import { AuthModule } from '../auth/auth.module';
+import { ManagementsModule } from '../managements/managements.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuthModule } from '../auth/auth.module';
     AlertsModule,
     SensorReadingsModule,
     AuthModule,
+    ManagementsModule,
   ],
   controllers: [DashboardController],
   providers: [DashboardService],

@@ -14,8 +14,10 @@ async function bootstrap() {
       'API REST para monitoramento e gestão de colônias de abelhas baseada em IoT. Acompanhe apiários, colmeias, leituras de sensores e alertas automatizados para operações modernas de apicultura.',
     )
     .setVersion('1.0')
+    .addTag('Alerts', 'Gerenciamento de alertas')
     .addTag('Apiaries', 'Gerenciamento de apiários')
     .addTag('Auth', 'Autenticação e autorização')
+    .addTag('Dashboard', 'Estatísticas do dashboard')
     .addTag('Harvests', 'Gerenciamento de colheitas')
     .addTag('Hives', 'Gerenciamento de colmeias')
     .addTag('Managements', 'Gerenciamento de manejos')
