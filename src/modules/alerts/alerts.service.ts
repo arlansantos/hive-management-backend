@@ -34,26 +34,31 @@ export class AlertsService {
   public async checkSensorReadingForAlerts(reading: CreateSensorReadingDto) {
     this.logger.log(`Checking alerts for hive ${reading.hiveId}...`);
 
+    const readingTime = formatAlertTimestamp(reading.timestamp);
+
     // 1. Checagem de Falha de Sensores
-    this.checkSensorFailure(reading);
+    this.checkSensorFailure(reading, readingTime);
 
     // 2. Checagem de Temperatura Interna
-    this.checkInternalTemp(reading);
+    this.checkInternalTemp(reading, readingTime);
 
     // 3. Checagem de Umidade Interna
-    this.checkInternalHumidity(reading);
+    this.checkInternalHumidity(reading, readingTime);
 
     // 4. Checagem de Peso (Crítico e Colheita)
-    await this.checkWeight(reading);
+    await this.checkWeight(reading, readingTime);
   }
 
-  private checkSensorFailure(reading: CreateSensorReadingDto) {
+  private checkSensorFailure(
+    reading: CreateSensorReadingDto,
+    readingTime: string,
+  ) {
     if (reading.internalTemperature === null) {
       this.createAlert(
         reading.hiveId,
         AlertType.SENSOR_FAILURE,
         AlertSeverity.WARNING,
-        'Sensor de temperatura interna reportou falha na leitura.',
+        `Sensor de temperatura interna reportou falha na leitura. (Registrado em: ${readingTime})`,
       );
     }
     if (reading.internalHumidity === null) {
@@ -61,7 +66,7 @@ export class AlertsService {
         reading.hiveId,
         AlertType.SENSOR_FAILURE,
         AlertSeverity.WARNING,
-        'Sensor de umidade interna reportou falha na leitura.',
+        `Sensor de umidade interna reportou falha na leitura. (Registrado em: ${readingTime})`,
       );
     }
     if (reading.weight === ALERT_THRESHOLDS.SENSOR_FAILURE_WEIGHT) {
@@ -69,26 +74,27 @@ export class AlertsService {
         reading.hiveId,
         AlertType.SENSOR_FAILURE,
         AlertSeverity.WARNING,
-        'Sensor de peso reportou falha na leitura.',
+        `Sensor de peso reportou falha na leitura. (Registrado em: ${readingTime})`,
       );
     }
   }
 
-  private checkInternalTemp(reading: CreateSensorReadingDto) {
+  private checkInternalTemp(
+    reading: CreateSensorReadingDto,
+    readingTime: string,
+  ) {
     if (
       reading.internalTemperature === null ||
       reading.internalTemperature === undefined
     )
       return;
 
-    const readingTime = formatAlertTimestamp(reading.timestamp);
-
     if (reading.internalTemperature > ALERT_THRESHOLDS.INTERNAL_TEMP_MAX) {
       this.createAlert(
         reading.hiveId,
         AlertType.HIGH_INTERNAL_TEMP,
         AlertSeverity.CRITICAL,
-        `Temperatura interna atingiu ${reading.internalTemperature}°C (Ocorrência: ${readingTime}).`,
+        `Temperatura interna atingiu ${reading.internalTemperature}°C. (Registrado em: ${readingTime}).`,
       );
     } else if (
       reading.internalTemperature < ALERT_THRESHOLDS.INTERNAL_TEMP_MIN
@@ -97,12 +103,15 @@ export class AlertsService {
         reading.hiveId,
         AlertType.LOW_INTERNAL_TEMP,
         AlertSeverity.CRITICAL,
-        `Temperatura interna caiu para ${reading.internalTemperature}°C.`,
+        `Temperatura interna caiu para ${reading.internalTemperature}°C. (Registrado em: ${readingTime}).`,
       );
     }
   }
 
-  private checkInternalHumidity(reading: CreateSensorReadingDto) {
+  private checkInternalHumidity(
+    reading: CreateSensorReadingDto,
+    readingTime: string,
+  ) {
     if (
       reading.internalHumidity === null ||
       reading.internalHumidity === undefined
@@ -114,7 +123,7 @@ export class AlertsService {
         reading.hiveId,
         AlertType.HIGH_INTERNAL_HUMIDITY,
         AlertSeverity.WARNING,
-        `Umidade interna atingiu ${reading.internalHumidity}%.`,
+        `Umidade interna atingiu ${reading.internalHumidity}%. (Registrado em: ${readingTime})`,
       );
     } else if (
       reading.internalHumidity < ALERT_THRESHOLDS.INTERNAL_HUMIDITY_MIN
@@ -123,12 +132,15 @@ export class AlertsService {
         reading.hiveId,
         AlertType.LOW_INTERNAL_HUMIDITY,
         AlertSeverity.WARNING,
-        `Umidade interna caiu para ${reading.internalHumidity}%.`,
+        `Umidade interna caiu para ${reading.internalHumidity}%. (Registrado em: ${readingTime})`,
       );
     }
   }
 
-  private async checkWeight(reading: CreateSensorReadingDto) {
+  private async checkWeight(
+    reading: CreateSensorReadingDto,
+    readingTime: string,
+  ) {
     if (
       reading.weight === null ||
       reading.weight === undefined ||
@@ -141,7 +153,7 @@ export class AlertsService {
         reading.hiveId,
         AlertType.HARVEST_READY,
         AlertSeverity.INFO,
-        `Colmeia atingiu ${reading.weight.toFixed(2)} kg. Pronta para avaliação de colheita.`,
+        `Colmeia atingiu ${reading.weight.toFixed(2)} kg. Pronta para avaliação de colheita. (Registrado em: ${readingTime})`,
       );
     }
 
@@ -159,7 +171,7 @@ export class AlertsService {
           reading.hiveId,
           AlertType.CRITICAL_WEIGHT_LOSS,
           AlertSeverity.CRITICAL,
-          `Perda de peso crítica de ${Math.abs(weightChange).toFixed(2)} kg detectada.`,
+          `Perda de peso crítica de ${Math.abs(weightChange).toFixed(2)} kg detectada. (Registrado em: ${readingTime})`,
         );
       }
     }

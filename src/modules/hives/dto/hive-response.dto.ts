@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { HiveStatus } from 'src/shared/enums/hive-status.enum';
 
 export class HiveResponseDto {
   @ApiProperty({ description: 'ID da colmeia' })
@@ -11,7 +12,7 @@ export class HiveResponseDto {
   name: string;
 
   @ApiProperty({ description: 'Status da colmeia' })
-  status: string;
+  status: HiveStatus;
 
   @ApiProperty({ description: 'Data do último registro' })
   lastRead: Date;

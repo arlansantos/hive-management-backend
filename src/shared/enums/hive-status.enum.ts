@@ -1,0 +1,6 @@
+export enum HiveStatus {
+  ACTIVE = 'ACTIVE',
+  OFFLINE = 'OFFLINE',
+  INACTIVE = 'INACTIVE',
+  MAINTENANCE = 'MAINTENANCE',
+}

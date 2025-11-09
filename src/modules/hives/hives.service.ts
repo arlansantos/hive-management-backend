@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, IsNull, Not, Repository } from 'typeorm';
 import { CreateHiveDto } from './dto/create-hive.dto';
 import { UpdateHiveDto } from './dto/update-hive.dto';
 import { ApiariesService } from '../apiaries/apiaries.service';
@@ -13,6 +13,7 @@ import { Hive } from 'src/database/entities/hive.entity';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { PaginationResponseDto } from 'src/common/dto/pagination-response.dto';
 import { AlertStatus } from 'src/shared/enums/alert-status.enum';
+import { HiveStatus } from 'src/shared/enums/hive-status.enum';
 
 @Injectable()
 export class HivesService {
@@ -78,6 +79,19 @@ export class HivesService {
       throw new InternalServerErrorException(
         'Erro ao buscar colmeias por apiários',
       );
+    }
+  }
+
+  async findAllByStatusAndLastReadNotNull(status: HiveStatus): Promise<Hive[]> {
+    try {
+      return await this.hiveRepository.find({
+        where: {
+          status: status,
+          lastRead: Not(IsNull()),
+        },
+      });
+    } catch {
+      throw new InternalServerErrorException('Erro ao buscar colmeias');
     }
   }
 
@@ -168,7 +182,10 @@ export class HivesService {
 
   async updateLastRead(id: string, timestamp: Date): Promise<void> {
     try {
-      await this.hiveRepository.update(id, { lastRead: timestamp });
+      await this.hiveRepository.update(id, {
+        lastRead: timestamp,
+        status: HiveStatus.ACTIVE,
+      });
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -176,6 +193,22 @@ export class HivesService {
 
       throw new InternalServerErrorException(
         'Erro ao atualizar última leitura',
+      );
+    }
+  }
+
+  async updateStatus(id: string, status: HiveStatus): Promise<void> {
+    try {
+      await this.hiveRepository.update(id, {
+        status,
+      });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        'Erro ao atualizar status da colmeia',
       );
     }
   }

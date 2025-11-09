@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
+import { HiveStatus } from 'src/shared/enums/hive-status.enum';
 
 export class UpdateHiveDto {
   @ApiPropertyOptional({ description: 'ID do apiário' })
@@ -13,8 +14,12 @@ export class UpdateHiveDto {
   @IsOptional()
   name?: string;
 
-  @ApiPropertyOptional({ description: 'Status da colmeia' })
-  @IsString()
+  @ApiPropertyOptional({
+    enum: HiveStatus,
+    default: HiveStatus.ACTIVE,
+    description: 'Status da colmeia',
+  })
   @IsOptional()
-  status?: string;
+  @IsEnum(HiveStatus)
+  status?: HiveStatus;
 }

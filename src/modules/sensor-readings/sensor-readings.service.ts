@@ -11,6 +11,7 @@ import { IsNull, Not, Repository } from 'typeorm';
 import { HivesService } from '../hives/hives.service';
 import { CreateSensorReadingDto } from './dto/create-sensor-reading.dto';
 import { HistoryQueryDto } from './dto/history-query.dto';
+import { HiveStatus } from 'src/shared/enums/hive-status.enum';
 
 @Injectable()
 export class SensorReadingsService {
@@ -26,6 +27,16 @@ export class SensorReadingsService {
     try {
       const hive = await this.hiveService.findOne(createDto.hiveId);
 
+      if (
+        hive.status === HiveStatus.MAINTENANCE ||
+        hive.status === HiveStatus.INACTIVE
+      ) {
+        this.logger.warn(
+          `[Ignorado] Leitura recebida para colmeia em status ${hive.status}: ${hive.id}.`,
+        );
+        return;
+      }
+
       const newReading = this.sensorReadingRepository.create({
         hive,
         ...createDto,
@@ -37,9 +48,9 @@ export class SensorReadingsService {
     } catch (error) {
       if (error instanceof NotFoundException) {
         this.logger.warn(
-          `[Ignorado] Recebida leitura para colmeia inexistente: ${createDto.hiveId}`,
+          `[Ignorado] - leitura para colmeia inexistente: ${createDto.hiveId}`,
         );
-        return;
+        throw new NotFoundException('Leitura para colmeia inexistente');
       }
       this.logger.error('Erro ao salvar leitura do sensor');
       throw new InternalServerErrorException(

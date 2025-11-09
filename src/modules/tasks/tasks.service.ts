@@ -4,6 +4,7 @@ import { HivesService } from '../hives/hives.service';
 import { AlertsService } from '../alerts/alerts.service';
 import { AlertType } from '../../shared/enums/alert-type.enum';
 import { AlertSeverity } from '../../shared/enums/alert-severity.enum';
+import { HiveStatus } from 'src/shared/enums/hive-status.enum';
 
 @Injectable()
 export class TasksService {
@@ -19,16 +20,21 @@ export class TasksService {
   async handleOfflineHiveCheck() {
     this.logger.log('CRON JOB: Verificando colmeias offline...');
 
-    const allHives = await this.hivesService.findAll();
     const offlineThreshold = new Date(
       Date.now() - this.OFFLINE_THRESHOLD_HOURS * 60 * 60 * 1000,
     );
 
-    for (const hive of allHives) {
-      const isOffline = !hive.lastRead || hive.lastRead < offlineThreshold;
+    const hivesToCheck =
+      await this.hivesService.findAllByStatusAndLastReadNotNull(
+        HiveStatus.ACTIVE,
+      );
 
-      if (isOffline) {
+    for (const hive of hivesToCheck) {
+      if (hive.lastRead < offlineThreshold) {
         this.logger.warn(`Colmeia ${hive.id} está OFFLINE.`);
+
+        await this.hivesService.updateStatus(hive.id, HiveStatus.OFFLINE);
+
         await this.alertsService.createAlert(
           hive.id,
           AlertType.HIVE_OFFLINE,

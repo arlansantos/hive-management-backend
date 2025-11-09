@@ -4,6 +4,7 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as mqtt from 'mqtt';
@@ -121,6 +122,9 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
 
       this.logger.log(`Successfully processed data for hive ${hiveId}`);
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        return;
+      }
       this.logger.error(
         `Failed to process message from topic ${topic}:`,
         error,
