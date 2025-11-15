@@ -12,6 +12,10 @@ import { HivesService } from '../hives/hives.service';
 import { CreateSensorReadingDto } from './dto/create-sensor-reading.dto';
 import { HistoryQueryDto } from './dto/history-query.dto';
 import { HiveStatus } from 'src/shared/enums/hive-status.enum';
+import {
+  ISensorHistoryRow,
+  ITranslatedHistoryRow,
+} from './dto/sensor-history.dto';
 
 @Injectable()
 export class SensorReadingsService {
@@ -105,7 +109,10 @@ export class SensorReadingsService {
     }
   }
 
-  async findHistory(hiveId: string, query: HistoryQueryDto): Promise<any[]> {
+  async findHistory(
+    hiveId: string,
+    query: HistoryQueryDto,
+  ): Promise<ISensorHistoryRow[]> {
     const { from, to } = query;
     const granularity = query.granularity || '1 hour';
 
@@ -134,7 +141,7 @@ export class SensorReadingsService {
           from,
           to,
         })
-        .getRawMany();
+        .getRawMany<ISensorHistoryRow>();
       return results;
     } catch (error) {
       if (error instanceof HttpException) throw error;
@@ -143,5 +150,30 @@ export class SensorReadingsService {
         'Erro ao buscar histórico de leituras',
       );
     }
+  }
+
+  async findHistoryForExport(
+    hiveId: string,
+    query: HistoryQueryDto,
+  ): Promise<ITranslatedHistoryRow[]> {
+    const rawHistory = await this.findHistory(hiveId, query);
+
+    if (rawHistory.length === 0) {
+      return [];
+    }
+
+    return this._translateHistoryDataToPortuguese(rawHistory);
+  }
+
+  private _translateHistoryDataToPortuguese(
+    data: ISensorHistoryRow[],
+  ): ITranslatedHistoryRow[] {
+    return data.map((row) => ({
+      'Data/Hora': row.time,
+      'Peso (kg)': row.weight,
+      'Temp. Interna (°C)': row.internalTemperature,
+      'Umidade Interna (%)': row.internalHumidity,
+      'Temp. Externa (°C)': row.externalTemperature,
+    }));
   }
 }
