@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Hive } from './hive.entity';
 import { User } from './user.entity';
+import { ManagementType } from 'src/shared/enums/management-type.enum';
 
 @Entity('management')
 export class Management {
@@ -21,8 +22,12 @@ export class Management {
   @Column({ name: 'user_id', type: 'uuid' })
   userId: string;
 
-  @Column({ type: 'varchar', length: 100 })
-  type: string;
+  @Column({
+    type: 'varchar',
+    length: 100,
+    default: ManagementType.OTHER,
+  })
+  type: ManagementType;
 
   @Column({ type: 'text', nullable: true })
   notes?: string;

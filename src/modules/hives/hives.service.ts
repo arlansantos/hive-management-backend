@@ -121,7 +121,10 @@ export class HivesService {
     const problematicHives = new Set<string>();
 
     for (const hive of hives) {
-      const isOffline = hive.lastRead && hive.lastRead < offlineThreshold;
+      const isOffline =
+        (hive.lastRead && hive.lastRead < offlineThreshold) ||
+        hive.status === HiveStatus.OFFLINE;
+
       const hasNewAlerts = hive.alerts.some(
         (alert) => alert.status === AlertStatus.NEW,
       );

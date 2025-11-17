@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ManagementType } from 'src/shared/enums/management-type.enum';
 
 export class ManagementResponseDto {
   @ApiProperty({ description: 'ID do manejo' })
@@ -11,7 +12,7 @@ export class ManagementResponseDto {
   userId: string;
 
   @ApiProperty({ description: 'Tipo de manejo' })
-  type: string;
+  type: ManagementType;
 
   @ApiProperty({ description: 'Observações' })
   notes?: string;

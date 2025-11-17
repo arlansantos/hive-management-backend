@@ -2,11 +2,13 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsDate,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
 } from 'class-validator';
+import { ManagementType } from 'src/shared/enums/management-type.enum';
 
 export class CreateManagementDto {
   @ApiProperty({ description: 'ID do colmeia' })
@@ -15,9 +17,14 @@ export class CreateManagementDto {
   @IsUUID()
   hiveId: string;
 
-  @ApiProperty({ description: 'Tipo de manejo' })
-  @IsString()
-  type: string;
+  @ApiPropertyOptional({
+    enum: ManagementType,
+    default: ManagementType.OTHER,
+    description: 'Tipo de manejo',
+  })
+  @IsOptional()
+  @IsEnum(ManagementType)
+  type?: ManagementType;
 
   @ApiPropertyOptional({ description: 'Observações' })
   @IsString()

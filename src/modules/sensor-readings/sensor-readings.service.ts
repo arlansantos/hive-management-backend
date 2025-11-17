@@ -16,6 +16,7 @@ import {
   ISensorHistoryRow,
   ITranslatedHistoryRow,
 } from './dto/sensor-history.dto';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class SensorReadingsService {
@@ -113,8 +114,46 @@ export class SensorReadingsService {
     hiveId: string,
     query: HistoryQueryDto,
   ): Promise<ISensorHistoryRow[]> {
+    return this._findHistoryBase(hiveId, query, true);
+  }
+
+  async findHistoryForExport(
+    hiveId: string,
+    query: HistoryQueryDto,
+  ): Promise<ITranslatedHistoryRow[]> {
+    const rawHistory = await this._findHistoryBase(hiveId, query, false);
+
+    if (rawHistory.length === 0) {
+      return [];
+    }
+    return this._translateHistoryDataToPortuguese(rawHistory);
+  }
+
+  private _getOptimalGranularity(from: Date, to: Date): string {
+    const diffInDays = dayjs(to).diff(dayjs(from), 'day');
+
+    if (diffInDays <= 3) return '1h';
+    if (diffInDays <= 7) return '2h';
+    if (diffInDays <= 15) return '4h';
+    if (diffInDays <= 30) return '8h';
+    if (diffInDays <= 90) return '1d';
+    return '1w';
+  }
+
+  private async _findHistoryBase(
+    hiveId: string,
+    query: HistoryQueryDto,
+    useGapfill: boolean,
+  ): Promise<ISensorHistoryRow[]> {
     const { from, to } = query;
-    const granularity = query.granularity || '1 hour';
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+
+    const granularity = this._getOptimalGranularity(fromDate, toDate);
+
+    const timeBucketSelect = useGapfill
+      ? `time_bucket_gapfill(:granularity, reading.timestamp, :from::timestamp, :to::timestamp)`
+      : `time_bucket(:granularity, reading.timestamp)`;
 
     try {
       await this.hiveService.findOne(hiveId);
@@ -123,25 +162,23 @@ export class SensorReadingsService {
         this.sensorReadingRepository.createQueryBuilder('reading');
 
       const results = await queryBuilder
-        .select(`time_bucket(:granularity, reading.timestamp)`, 'time')
+        .select(timeBucketSelect, 'time')
         .addSelect('AVG(reading.weight)', 'weight')
         .addSelect('AVG(reading.internalTemperature)', 'internalTemperature')
         .addSelect('AVG(reading.internalHumidity)', 'internalHumidity')
         .addSelect('AVG(reading.externalTemperature)', 'externalTemperature')
-        .where('reading.hiveId = :hiveId', { hiveId })
-        .andWhere('reading.timestamp BETWEEN :from AND :to', {
-          from,
-          to,
-        })
+        .where('reading.hiveId = :hiveId')
+        .andWhere('reading.timestamp BETWEEN :from AND :to')
         .groupBy('time')
         .orderBy('time', 'ASC')
         .setParameters({
           granularity,
           hiveId,
-          from,
-          to,
+          from: fromDate,
+          to: toDate,
         })
         .getRawMany<ISensorHistoryRow>();
+
       return results;
     } catch (error) {
       if (error instanceof HttpException) throw error;
@@ -150,19 +187,6 @@ export class SensorReadingsService {
         'Erro ao buscar histórico de leituras',
       );
     }
-  }
-
-  async findHistoryForExport(
-    hiveId: string,
-    query: HistoryQueryDto,
-  ): Promise<ITranslatedHistoryRow[]> {
-    const rawHistory = await this.findHistory(hiveId, query);
-
-    if (rawHistory.length === 0) {
-      return [];
-    }
-
-    return this._translateHistoryDataToPortuguese(rawHistory);
   }
 
   private _translateHistoryDataToPortuguese(

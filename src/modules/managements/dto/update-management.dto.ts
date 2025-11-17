@@ -1,12 +1,17 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsOptional, IsString } from 'class-validator';
+import { IsDate, IsEnum, IsOptional, IsString } from 'class-validator';
+import { ManagementType } from 'src/shared/enums/management-type.enum';
 
 export class UpdateManagementDto {
-  @ApiPropertyOptional({ description: 'Tipo de manejo' })
-  @IsString()
+  @ApiPropertyOptional({
+    enum: ManagementType,
+    default: ManagementType.OTHER,
+    description: 'Tipo de manejo',
+  })
   @IsOptional()
-  type?: string;
+  @IsEnum(ManagementType)
+  type?: ManagementType;
 
   @ApiPropertyOptional({ description: 'Observações' })
   @IsString()

@@ -1,10 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsDateString,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsDateString, IsNotEmpty } from 'class-validator';
 
 export class HistoryQueryDto {
   @ApiProperty({ description: 'Data de início da consulta' })
@@ -16,9 +11,4 @@ export class HistoryQueryDto {
   @IsDateString()
   @IsNotEmpty()
   to: string;
-
-  @ApiPropertyOptional({ description: 'Granularidade da consulta' })
-  @IsString()
-  @IsOptional()
-  granularity?: string;
 }
