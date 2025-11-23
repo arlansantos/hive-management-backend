@@ -42,6 +42,8 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
       'MQTT_CLIENT_ID',
       'hive_management_backend',
     );
+    const username = this.configService.get<string>('MQTT_USER');
+    const password = this.configService.get<string>('MQTT_PASS');
 
     const brokerUrl = `mqtt://${host}:${port}`;
 
@@ -52,6 +54,8 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
       clean: true,
       connectTimeout: 4000,
       reconnectPeriod: 1000,
+      username: username,
+      password: password,
     });
 
     this.client.on('connect', () => {

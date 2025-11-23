@@ -19,7 +19,7 @@ services:
     networks:
       - hive_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d hive_management_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -31,21 +31,19 @@ services:
     restart: unless-stopped
     ports:
       - "1883:1883"
-      - "9001:9001"
     volumes:
-      - ./mqtt/config:/mosquitto/config
-      # - ./mqtt/data:/mosquitto/data
-      # - ./mqtt/log:/mosquitto/log
+      - ./mqtt/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mqtt/config/passwd:/mosquitto/config/passwd
       - mosquitto_data:/mosquitto/data
     networks:
       - hive_network
     healthcheck:
-      test: ["CMD-SHELL", "mosquitto_pub -h localhost -t test -m 'health check' || exit 1"]
+      test: ["CMD", "mosquitto_sub", "-t", "$SYS/#", "-C", "1", "-i", "healthcheck", "-u", "healthcheck_user", "-P", "healthcheck_pass"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-  # Aplicação NestJS
+  # Aplicação Backend (NestJS)
   app:
     build:
       context: .
@@ -56,22 +54,25 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
-      - DATABASE_HOST=postgres
-      - DATABASE_PORT=5432
-      - DATABASE_NAME=hive_management
-      - DATABASE_USER=postgres
-      - DATABASE_PASSWORD=postgres123
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
       - MQTT_HOST=mosquitto
-      - MQTT_PORT=1883
+      - MQTT_PORT=1883.
+      - MQTT_CLIENT_ID=${MQTT_CLIENT_ID}
+      - MQTT_USER=${MQTT_USER}
+      - MQTT_PASS=${MQTT_PASS}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
     volumes:
-      - .:/app
-      - /app/node_modules
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
     networks:
       - hive_network
     depends_on:
       postgres:
-        condition: service_healthy
-      mosquitto:
         condition: service_healthy
     profiles:
       - app
