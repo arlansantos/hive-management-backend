@@ -60,7 +60,7 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - MQTT_HOST=mosquitto
-      - MQTT_PORT=1883.
+      - MQTT_PORT=${MQTT_PORT}
       - MQTT_CLIENT_ID=${MQTT_CLIENT_ID}
       - MQTT_USER=${MQTT_USER}
       - MQTT_PASS=${MQTT_PASS}
@@ -74,8 +74,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    profiles:
-      - app
+      mosquitto:
+        condition: service_healthy
 
 volumes:
   postgres_data:
