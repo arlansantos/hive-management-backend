@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL com TimescaleDB
   postgres:
     image: timescale/timescaledb:latest-pg15
     container_name: hive_management_db
@@ -11,8 +10,6 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init:/docker-entrypoint-initdb.d
@@ -24,7 +21,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # MQTT Broker (Mosquitto)
   mosquitto:
     image: eclipse-mosquitto:latest
     container_name: hive_management_mqtt
@@ -43,46 +39,19 @@ services:
       timeout: 10s
       retries: 3
 
-  # Aplicação Backend (NestJS)
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
     container_name: hive_management_app
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=development
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - MQTT_HOST=mosquitto
-      - MQTT_PORT=${MQTT_PORT}
-      - MQTT_CLIENT_ID=${MQTT_CLIENT_ID}
-      - MQTT_USER=${MQTT_USER}
-      - MQTT_PASS=${MQTT_PASS}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
     networks:
       - hive_network
     depends_on:
       postgres:
         condition: service_healthy
       mosquitto:
-        condition: service_healthy
+        condition: service_started
 
 volumes:
   postgres_data:
-    driver: local
   mosquitto_data:
-    driver: local
 
 networks:
   hive_network:
-    driver: bridge

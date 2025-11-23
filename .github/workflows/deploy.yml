@@ -1,0 +1,67 @@
+name: Deploy to Digital Ocean
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 1. Copia os arquivos do projeto para o servidor
+    - name: Copy files via SCP
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.DO_HOST }}
+        username: ${{ secrets.DO_USERNAME }}
+        key: ${{ secrets.DO_SSH_KEY }}
+        source: "."
+        target: "/app/hive-management"
+        rm: true
+
+    # 2. Conecta via SSH e executa os comandos
+    - name: Execute Remote SSH Commands
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.DO_HOST }}
+        username: ${{ secrets.DO_USERNAME }}
+        key: ${{ secrets.DO_SSH_KEY }}
+        script: |
+          cd /app/hive-management
+
+          # Instala Docker e Compose se não existirem
+          if ! command -v docker &> /dev/null; then
+              curl -fsSL https://get.docker.com -o get-docker.sh
+              sh get-docker.sh
+          fi
+
+          # Cria o arquivo .env com base na Secret do GitHub
+          echo "${{ secrets.ENV_PROD }}" > .env
+
+          # GARANTINDO AS SENHAS DO MQTT
+          # Cria diretórios se não existirem
+          mkdir -p mqtt/config
+
+          # Cria o arquivo de senhas vazio
+          touch mqtt/config/passwd
+
+          # Gera senha do usuário principal (smarthive)
+          docker run --rm -v $(pwd)/mqtt/config:/mosquitto/config eclipse-mosquitto \
+          mosquitto_passwd -b /mosquitto/config/passwd smarthive "${{ secrets.MQTT_PASS }}"
+
+          # Gera senha do usuário healthcheck
+          docker run --rm -v $(pwd)/mqtt/config:/mosquitto/config eclipse-mosquitto \
+          mosquitto_passwd -b /mosquitto/config/passwd healthcheck_user "${{ secrets.MQTT_HEALTH_PASS }}"
+
+          # Para e remove containers antigos para garantir rebuild limpo
+          docker compose down
+
+          # Sobe tudo em modo detached (-d) e força o build (--build)
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+
+          # Limpa imagens antigas para não lotar o disco do servidor
+          docker image prune -f
