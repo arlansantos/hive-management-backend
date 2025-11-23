@@ -9,7 +9,7 @@ import {
 import { UserApiary } from './user-apiary.entity';
 import { Management } from './management.entity';
 import { Harvest } from './harvest.entity';
-import { UserRole } from 'src/shared/enums/user-role.enum';
+import { UserRole } from '../../shared/enums/user-role.enum';
 
 @Entity('users')
 export class User {

@@ -8,9 +8,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Hive } from './hive.entity';
-import { AlertType } from 'src/shared/enums/alert-type.enum';
-import { AlertSeverity } from 'src/shared/enums/alert-severity.enum';
-import { AlertStatus } from 'src/shared/enums/alert-status.enum';
+import { AlertType } from '../../shared/enums/alert-type.enum';
+import { AlertSeverity } from '../../shared/enums/alert-severity.enum';
+import { AlertStatus } from '../../shared/enums/alert-status.enum';
 
 @Entity('alerts')
 export class Alert {

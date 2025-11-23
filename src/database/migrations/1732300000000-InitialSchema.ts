@@ -4,12 +4,6 @@ export class InitialSchema1732300000000 implements MigrationInterface {
   name = 'InitialSchema1732300000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // 1. Habilitar extensões necessárias (UUID e TimescaleDB)
-    await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
-    await queryRunner.query(
-      `CREATE EXTENSION IF NOT EXISTS "timescaledb" CASCADE`,
-    );
-
     // 2. Criar Tabela USERS
     await queryRunner.query(`
       CREATE TABLE "users" (

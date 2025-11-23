@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Hive } from './hive.entity';
 import { User } from './user.entity';
-import { ManagementType } from 'src/shared/enums/management-type.enum';
+import { ManagementType } from '../../shared/enums/management-type.enum';
 
 @Entity('management')
 export class Management {

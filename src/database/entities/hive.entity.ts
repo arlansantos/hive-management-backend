@@ -12,7 +12,7 @@ import { Apiary } from './apiary.entity';
 import { SensorReading } from './sensor-reading.entity';
 import { Management } from './management.entity';
 import { Alert } from './alert.entity';
-import { HiveStatus } from 'src/shared/enums/hive-status.enum';
+import { HiveStatus } from '../../shared/enums/hive-status.enum';
 
 @Entity('hives')
 export class Hive {

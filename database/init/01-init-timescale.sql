@@ -7,13 +7,13 @@ CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Configurações iniciais do banco
-ALTER DATABASE hive_management SET timezone TO 'UTC';
+ALTER DATABASE hive_management_db SET timezone TO 'UTC';
 
 -- Log de inicialização
 DO $$
 BEGIN
     RAISE NOTICE 'TimescaleDB initialization completed successfully!';
-    RAISE NOTICE 'Database: hive_management';
+    RAISE NOTICE 'Database: hive_management_db';
     RAISE NOTICE 'Timezone: UTC';
     RAISE NOTICE 'Extensions: timescaledb, uuid-ossp';
 END $$;
