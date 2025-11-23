@@ -28,7 +28,7 @@ export class User {
   @Column({ name: 'refresh_token', type: 'varchar', nullable: true })
   refreshToken?: string | null;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
+  @Column({ type: 'varchar', length: 50, default: UserRole.USER })
   role: UserRole;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
